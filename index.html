@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="description" content="A modern TMDB-powered movie and TV streaming interface.">
+
+  <title>Dulo — Movies & TV</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dulo: {
+              bg: '#0b0f19',
+              card: '#161b26',
+              red: '#ef4444',
+              muted: '#8b93a7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: #303747 transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: #0b0f19;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% -20%, rgba(239,68,68,.10), transparent 35%),
+        #0b0f19;
+      color: #fff;
+      font-family: Inter, system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    .glass {
+      background: rgba(22,27,38,.78);
+      border: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .glass-heavy {
+      background: rgba(11,15,25,.90);
+      border: 1px solid rgba(255,255,255,.07);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+    }
+
+    .card {
+      background: #161b26;
+      border: 1px solid rgba(255,255,255,.045);
+      transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(239,68,68,.28);
+      box-shadow: 0 18px 45px rgba(0,0,0,.35);
+    }
+
+    .poster {
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      background: #161b26;
+    }
+
+    .backdrop {
+      object-fit: cover;
+    }
+
+    .fade-in {
+      animation: fadeIn .45s ease both;
+    }
+
+    .slide-up {
+      animation: slideUp .45s ease both;
+    }
+
+    .drawer-in {
+      animation: drawerIn .3s ease both;
+    }
+
+    .drawer-out {
+      animation: drawerOut .25s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0 }
+      to { opacity: 1 }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px)
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes drawerIn {
+      from { transform: translateX(-100%) }
+      to { transform: translateX(0) }
+    }
+
+    @keyframes drawerOut {
+      from { transform: translateX(0) }
+      to { transform: translateX(-100%) }
+    }
+
+    .hero-gradient {
+      background:
+        linear-gradient(
+          90deg,
+          #0b0f19 0%,
+          rgba(11,15,25,.96) 17%,
+          rgba(11,15,25,.75) 40%,
+          rgba(11,15,25,.18) 72%,
+          rgba(11,15,25,.85) 100%
+        ),
+        linear-gradient(
+          0deg,
+          #0b0f19 0%,
+          transparent 35%
+        );
+    }
+
+    .hero-mobile-gradient {
+      background:
+        linear-gradient(
+          0deg,
+          #0b0f19 0%,
+          rgba(11,15,25,.82) 35%,
+          rgba(11,15,25,.1) 75%
+        );
+    }
+
+    .hide-scrollbar {
+      scrollbar-width: none;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .row-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .row-scroll > * {
+      scroll-snap-align: start;
+      flex: 0 0 auto;
+    }
+
+    .poster-card {
+      width: 145px;
+    }
+
+    @media (min-width: 640px) {
+      .poster-card {
+        width: 165px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .poster-card {
+        width: 185px;
+      }
+    }
+
+    .hero {
+      min-height: 620px;
+    }
+
+    @media (max-width: 767px) {
+      .hero {
+        min-height: 650px;
+      }
+    }
+
+    .number-card {
+      width: 190px;
+    }
+
+    .rank-number {
+      font-size: 130px;
+      line-height: .8;
+      font-weight: 900;
+      color: rgba(255,255,255,.055);
+      position: absolute;
+      left: -30px;
+      bottom: 10px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .modal-backdrop {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(11,15,25,.55),
+          #0b0f19 72%
+        );
+    }
+
+    .modal-scroll {
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .star {
+      transition: transform .15s ease, color .15s ease;
+    }
+
+    .star:hover {
+      transform: scale(1.2);
+    }
+
+    .skeleton {
+      position: relative;
+      overflow: hidden;
+      background: #161b26;
+    }
+
+    .skeleton::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.05),
+        transparent
+      );
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .search-result {
+      transition: background .2s ease;
+    }
+
+    .search-result:hover {
+      background: rgba(255,255,255,.06);
+    }
+
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    #toast {
+      transform: translateY(120px);
+      transition: transform .3s ease;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+    }
+
+    .no-results {
+      min-height: 180px;
+    }
+
+    .player-frame {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      background: #000;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     APP
+============================================================ -->
+
+<div id="app" class="min-h-screen">
+
+  <!-- HEADER -->
+  <header
+    class="fixed top-0 left-0 right-0 z-40 transition-all duration-300"
+    id="header"
+  >
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="glass rounded-2xl h-16 flex items-center gap-3 px-3 sm:px-5">
+
+        <!-- Menu -->
+        <button
+          id="menuBtn"
+          class="w-11 h-11 rounded-xl hover:bg-white/10 flex items-center justify-center shrink-0"
+          aria-label="Open menu"
+        >
+          <i data-lucide="menu"></i>
+        </button>
+
+        <!-- Logo -->
+        <button
+          onclick="scrollToHome()"
+          class="flex items-center gap-2 shrink-0"
+        >
+          <div class="w-9 h-9 rounded-xl bg-red-500 flex items-center justify-center font-black">
+            D
+          </div>
+          <span class="hidden sm:block text-xl font-black tracking-tight">
+            dulo
+          </span>
+        </button>
+
+        <!-- Search -->
+        <div class="relative flex-1 max-w-xl mx-auto">
+          <div class="relative">
+            <i
+              data-lucide="search"
+              class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"
+            ></i>
+
+            <input
+              id="searchInput"
+              type="search"
+              autocomplete="off"
+              placeholder="Search movies, shows, anime..."
+              class="w-full h-11 bg-white/5 border border-white/5 rounded-xl pl-11 pr-4 outline-none focus:border-red-500/50 focus:bg-white/[.07] transition"
+            >
+          </div>
+
+          <div
+            id="searchResults"
+            class="hidden absolute top-14 left-0 right-0 glass-heavy rounded-2xl overflow-hidden shadow-2xl"
+          ></div>
+        </div>
+
+        <!-- Desktop actions -->
+        <div class="hidden md:flex items-center gap-2">
+          <button
+            onclick="showSection('home')"
+            class="header-action"
+          >
+            Home
+          </button>
+
+          <button
+            onclick="showSection('movies')"
+            class="header-action"
+          >
+            Movies
+          </button>
+
+          <button
+            onclick="showSection('shows')"
+            class="header-action"
+          >
+            Shows
+          </button>
+
+          <button
+            onclick="showSection('anime')"
+            class="header-action"
+          >
+            Anime
+          </button>
+        </div>
+
+        <button
+          onclick="showSection('library')"
+          class="w-11 h-11 rounded-xl hover:bg-white/10 flex items-center justify-center shrink-0"
+          title="Library"
+        >
+          <i data-lucide="bookmark"></i>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+
+  <!-- SIDE DRAWER -->
+  <div
+    id="drawerOverlay"
+    class="fixed inset-0 bg-black/70 z-50 hidden"
+  ></div>
+
+  <aside
+    id="drawer"
+    class="fixed left-0 top-0 bottom-0 z-[60] w-[300px] max-w-[88vw] glass-heavy transform -translate-x-full overflow-y-auto"
+  >
+    <div class="p-5">
+
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center font-black">
+            D
+          </div>
+          <span class="text-xl font-black">dulo</span>
+        </div>
+
+        <button
+          id="closeDrawer"
+          class="w-10 h-10 rounded-xl hover:bg-white/10 flex items-center justify-center"
+        >
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="space-y-1">
+
+        <p class="text-[10px] uppercase tracking-[.2em] text-gray-500 px-3 mb-2">
+          Browse
+        </p>
+
+        <button class="drawer-link active" onclick="showSection('home');closeDrawer()">
+          <i data-lucide="house"></i>
+          Home
+        </button>
+
+        <button class="drawer-link" onclick="showSection('live');closeDrawer()">
+          <i data-lucide="radio"></i>
+          Live TV / Sports
+        </button>
+
+        <button class="drawer-link" onclick="showSection('movies');closeDrawer()">
+          <i data-lucide="film"></i>
+          Movies
+        </button>
+
+        <button class="drawer-link" onclick="showSection('shows');closeDrawer()">
+          <i data-lucide="tv"></i>
+          Shows
+        </button>
+
+        <button class="drawer-link" onclick="showSection('anime');closeDrawer()">
+          <i data-lucide="sparkles"></i>
+          Anime
+        </button>
+
+        <button class="drawer-link" onclick="showSection('library');closeDrawer()">
+          <i data-lucide="library"></i>
+          Library
+        </button>
+
+        <div class="h-px bg-white/5 my-5"></div>
+
+        <p class="text-[10px] uppercase tracking-[.2em] text-gray-500 px-3 mb-2">
+          Discover
+        </p>
+
+        <button class="drawer-link" onclick="discoverTrending();closeDrawer()">
+          <i data-lucide="flame"></i>
+          Trending
+        </button>
+
+        <button class="drawer-link" onclick="showSection('calendar');closeDrawer()">
+          <i data-lucide="calendar-days"></i>
+          Calendar
+        </button>
+
+        <button class="drawer-link" onclick="showGenres();closeDrawer()">
+          <i data-lucide="tags"></i>
+          Genres
+        </button>
+
+        <button class="drawer-link" onclick="showToast('Watch Parties can be connected to your own realtime backend.')">
+          <i data-lucide="users"></i>
+          Watch Parties
+        </button>
+
+        <div class="h-px bg-white/5 my-5"></div>
+
+        <p class="text-[10px] uppercase tracking-[.2em] text-gray-500 px-3 mb-2">
+          Platforms
+        </p>
+
+        <button class="drawer-link">
+          <i data-lucide="play-square"></i>
+          Netflix
+        </button>
+
+        <button class="drawer-link">
+          <i data-lucide="prime"></i>
+          Prime Video
+        </button>
+
+        <button class="drawer-link">
+          <i data-lucide="play"></i>
+          Disney+
+        </button>
+
+        <button class="drawer-link">
+          <i data-lucide="circle-play"></i>
+          Crunchyroll
+        </button>
+
+        <button class="drawer-link">
+          <i data-lucide="monitor-play"></i>
+          AMC
+        </button>
+
+      </div>
+
+      <div class="mt-10 p-4 rounded-2xl bg-white/[.03] border border-white/5">
+        <p class="font-semibold text-sm mb-1">Your watchlist</p>
+        <p class="text-xs text-gray-500">
+          Favorites and watch progress are stored locally on this device.
+        </p>
+      </div>
+
+    </div>
+  </aside>
+
+
+  <!-- MAIN -->
+  <main id="mainContent" class="pt-24 pb-28 md:pb-12">
+
+    <!-- =========================================================
+         HOME
+    ========================================================== -->
+
+    <section id="homeSection">
+
+      <!-- HERO -->
+      <section
+        id="hero"
+        class="hero relative overflow-hidden"
+      >
+        <div
+          id="heroBackdrop"
+          class="absolute inset-0 bg-cover bg-center transition-all duration-700"
+        ></div>
+
+        <div class="absolute inset-0 hero-gradient hidden md:block"></div>
+        <div class="absolute inset-0 hero-mobile-gradient md:hidden"></div>
+
+        <div class="relative max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 h-full flex items-end md:items-center">
+
+          <div class="max-w-2xl pb-12 md:pb-0 pt-40">
+            <div class="flex items-center gap-2 mb-4">
+              <span
+                id="heroRating"
+                class="px-2.5 py-1 rounded-lg bg-yellow-400/15 text-yellow-300 text-xs font-bold"
+              >
+                ★ 0.0
+              </span>
+
+              <span id="heroYear" class="text-sm text-gray-300">
+                2026
+              </span>
+
+              <span class="w-1 h-1 rounded-full bg-gray-500"></span>
+
+              <span id="heroType" class="text-sm text-gray-300">
+                Movie
+              </span>
+            </div>
+
+            <h1
+              id="heroTitle"
+              class="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[.95] mb-5"
+            >
+              Loading...
+            </h1>
+
+            <p
+              id="heroOverview"
+              class="text-gray-300 text-sm sm:text-base leading-7 line-clamp-3 max-w-xl mb-7"
+            >
+              Discover movies and shows powered by TMDB.
+            </p>
+
+            <div class="flex flex-wrap gap-3">
+              <button
+                id="heroWatchBtn"
+                class="h-12 px-6 rounded-xl bg-red-500 hover:bg-red-400 font-bold flex items-center gap-2 transition"
+              >
+                <i data-lucide="play" class="fill-current w-4 h-4"></i>
+                Watch Now
+              </button>
+
+              <button
+                id="heroInfoBtn"
+                class="h-12 px-6 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-xl font-semibold flex items-center gap-2 transition"
+              >
+                <i data-lucide="info" class="w-4 h-4"></i>
+                Details
+              </button>
+            </div>
+
+            <div
+              id="heroDots"
+              class="flex gap-2 mt-8"
+            ></div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- HOME CONTENT -->
+      <div class="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 space-y-12 mt-4">
+
+        <!-- Continue Watching -->
+        <section id="continueSection" class="hidden">
+          <div class="flex items-end justify-between mb-4">
+            <div>
+              <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+                Pick up where you left off
+              </p>
+              <h2 class="text-2xl font-black">Continue Watching</h2>
+            </div>
+          </div>
+
+          <div id="continueRow" class="row-scroll hide-scrollbar"></div>
+        </section>
+
+
+        <!-- Trending -->
+        <section>
+          <div class="flex items-end justify-between mb-5">
+            <div>
+              <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+                What's hot
+              </p>
+              <h2 class="text-2xl sm:text-3xl font-black">
+                Trending Now
+              </h2>
+            </div>
+
+            <button
+              onclick="discoverTrending()"
+              class="text-sm text-gray-400 hover:text-white"
+            >
+              View all →
+            </button>
+          </div>
+
+          <div id="trendingRow" class="row-scroll hide-scrollbar">
+            <div class="poster-card skeleton rounded-xl"></div>
+            <div class="poster-card skeleton rounded-xl"></div>
+            <div class="poster-card skeleton rounded-xl"></div>
+            <div class="poster-card skeleton rounded-xl"></div>
+          </div>
+        </section>
+
+
+        <!-- Top 10 Movies -->
+        <section>
+          <div class="mb-5">
+            <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+              The biggest hits
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black">
+              Top 10 Movies
+            </h2>
+          </div>
+
+          <div id="topMoviesRow" class="row-scroll hide-scrollbar"></div>
+        </section>
+
+
+        <!-- Top 10 Shows -->
+        <section>
+          <div class="mb-5">
+            <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+              Binge worthy
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black">
+              Top 10 TV Shows
+            </h2>
+          </div>
+
+          <div id="topShowsRow" class="row-scroll hide-scrollbar"></div>
+        </section>
+
+
+        <!-- Popular Movies -->
+        <section>
+          <div class="mb-5">
+            <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+              Movies
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black">
+              Popular Movies
+            </h2>
+          </div>
+
+          <div id="popularMoviesRow" class="row-scroll hide-scrollbar"></div>
+        </section>
+
+
+        <!-- Popular Shows -->
+        <section>
+          <div class="mb-5">
+            <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+              Series
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black">
+              Popular Shows
+            </h2>
+          </div>
+
+          <div id="popularShowsRow" class="row-scroll hide-scrollbar"></div>
+        </section>
+
+
+        <!-- Anime -->
+        <section>
+          <div class="mb-5">
+            <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+              Japanese animation
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black">
+              Popular Anime
+            </h2>
+          </div>
+
+          <div id="animeRow" class="row-scroll hide-scrollbar"></div>
+        </section>
+
+
+        <!-- Streaming Apps -->
+        <section>
+          <div class="mb-5">
+            <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+              Your favorites
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black">
+              Streaming Apps
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+            <div class="glass rounded-2xl p-5 h-28 flex items-center justify-center font-black text-xl">
+              NETFLIX
+            </div>
+
+            <div class="glass rounded-2xl p-5 h-28 flex items-center justify-center font-bold text-xl">
+              prime video
+            </div>
+
+            <div class="glass rounded-2xl p-5 h-28 flex items-center justify-center font-bold text-xl">
+              Disney+
+            </div>
+
+            <div class="glass rounded-2xl p-5 h-28 flex items-center justify-center font-bold text-xl">
+              Crunchyroll
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- Live -->
+        <section id="livePreview">
+          <div class="mb-5">
+            <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+              Live
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black">
+              Live Sports & TV
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+            <button
+              onclick="openLivePlayer('ESPN Demo','')"
+              class="glass rounded-2xl p-5 text-left hover:border-red-500/30 transition"
+            >
+              <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center mb-4">
+                <i data-lucide="radio" class="text-red-400"></i>
+              </div>
+              <p class="font-bold">ESPN</p>
+              <p class="text-xs text-gray-500 mt-1">Sports</p>
+            </button>
+
+            <button
+              onclick="openLivePlayer('CBS Sports Demo','')"
+              class="glass rounded-2xl p-5 text-left hover:border-red-500/30 transition"
+            >
+              <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center mb-4">
+                <i data-lucide="trophy" class="text-red-400"></i>
+              </div>
+              <p class="font-bold">CBS Sports</p>
+              <p class="text-xs text-gray-500 mt-1">Sports</p>
+            </button>
+
+            <button
+              onclick="openLivePlayer('Sky Sports Demo','')"
+              class="glass rounded-2xl p-5 text-left hover:border-red-500/30 transition"
+            >
+              <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center mb-4">
+                <i data-lucide="tv" class="text-red-400"></i>
+              </div>
+              <p class="font-bold">Sky Sports</p>
+              <p class="text-xs text-gray-500 mt-1">Sports</p>
+            </button>
+
+            <button
+              onclick="showSection('live')"
+              class="glass rounded-2xl p-5 text-left hover:border-red-500/30 transition"
+            >
+              <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center mb-4">
+                <i data-lucide="plus" class="text-red-400"></i>
+              </div>
+              <p class="font-bold">Add Channel</p>
+              <p class="text-xs text-gray-500 mt-1">Your HLS / iframe</p>
+            </button>
+
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         CATALOG
+    ========================================================== -->
+
+    <section id="catalogSection" class="hidden">
+      <div class="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
+
+        <div class="mb-8">
+          <p id="catalogEyebrow" class="text-xs text-red-400 font-bold uppercase tracking-widest mb-2">
+            Browse
+          </p>
+
+          <h1
+            id="catalogTitle"
+            class="text-4xl sm:text-5xl font-black"
+          >
+            Movies
+          </h1>
+
+          <p
+            id="catalogDescription"
+            class="text-gray-500 mt-3 max-w-2xl"
+          ></p>
+        </div>
+
+        <div
+          id="genreButtons"
+          class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-7"
+        ></div>
+
+        <div
+          id="catalogGrid"
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4"
+        ></div>
+
+        <div
+          id="catalogLoader"
+          class="flex justify-center py-12 hidden"
+        >
+          <div class="w-8 h-8 border-2 border-white/10 border-t-red-500 rounded-full animate-spin"></div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         LIBRARY
+    ========================================================== -->
+
+    <section id="librarySection" class="hidden">
+      <div class="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
+
+        <div class="mb-8">
+          <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-2">
+            Personal
+          </p>
+
+          <h1 class="text-4xl sm:text-5xl font-black">
+            My Library
+          </h1>
+
+          <p class="text-gray-500 mt-3">
+            Your favorites and saved titles stay on this device.
+          </p>
+        </div>
+
+        <div id="libraryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4"></div>
+
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         LIVE
+    ========================================================== -->
+
+    <section id="liveSection" class="hidden">
+      <div class="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
+
+        <div class="mb-8">
+          <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-2">
+            Live
+          </p>
+
+          <h1 class="text-4xl sm:text-5xl font-black">
+            Live TV & Sports
+          </h1>
+
+          <p class="text-gray-500 mt-3 max-w-2xl">
+            Add your own licensed HLS streams or authorized iframe broadcasts.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+          <button
+            onclick="openLivePlayer('Your Sports Channel','')"
+            class="glass rounded-2xl p-6 text-left hover:border-red-500/30"
+          >
+            <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-5">
+              <i data-lucide="radio" class="text-red-400"></i>
+            </div>
+
+            <h3 class="font-bold">Sports Channel</h3>
+            <p class="text-xs text-gray-500 mt-2">
+              Configure your HLS URL
+            </p>
+          </button>
+
+          <button
+            onclick="openLivePlayer('News Channel','')"
+            class="glass rounded-2xl p-6 text-left hover:border-red-500/30"
+          >
+            <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-5">
+              <i data-lucide="newspaper" class="text-red-400"></i>
+            </div>
+
+            <h3 class="font-bold">News Channel</h3>
+            <p class="text-xs text-gray-500 mt-2">
+              Configure your HLS URL
+            </p>
+          </button>
+
+        </div>
+
+        <div class="mt-10 glass rounded-2xl p-5">
+          <h3 class="font-bold mb-2">
+            HLS integration
+          </h3>
+
+          <p class="text-sm text-gray-500">
+            Replace the empty source in the JavaScript channel configuration
+            with an HLS URL that you own or are authorized to distribute.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         CALENDAR
+    ========================================================== -->
+
+    <section id="calendarSection" class="hidden">
+      <div class="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
+
+        <div class="mb-8">
+          <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-2">
+            Schedule
+          </p>
+
+          <h1 class="text-4xl sm:text-5xl font-black">
+            Release Calendar
+          </h1>
+        </div>
+
+        <div id="calendarGrid" class="space-y-5"></div>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ============================================================
+       MOBILE NAV
+  ============================================================= -->
+
+  <nav
+    class="md:hidden fixed bottom-0 left-0 right-0 z-40 safe-bottom px-3 pb-3"
+  >
+    <div class="glass-heavy rounded-2xl p-2 flex justify-around">
+
+      <button
+        onclick="showSection('home')"
+        class="mobile-nav-item"
+      >
+        <i data-lucide="house"></i>
+        <span>Home</span>
+      </button>
+
+      <button
+        onclick="showSection('live')"
+        class="mobile-nav-item"
+      >
+        <i data-lucide="radio"></i>
+        <span>Live</span>
+      </button>
+
+      <button
+        onclick="showSection('movies')"
+        class="mobile-nav-item"
+      >
+        <i data-lucide="film"></i>
+        <span>Movies</span>
+      </button>
+
+      <button
+        onclick="showSection('shows')"
+        class="mobile-nav-item"
+      >
+        <i data-lucide="tv"></i>
+        <span>Shows</span>
+      </button>
+
+      <button
+        onclick="showSection('anime')"
+        class="mobile-nav-item"
+      >
+        <i data-lucide="sparkles"></i>
+        <span>Anime</span>
+      </button>
+
+      <button
+        onclick="showSection('library')"
+        class="mobile-nav-item"
+      >
+        <i data-lucide="bookmark"></i>
+        <span>Saved</span>
+      </button>
+
+    </div>
+  </nav>
+
+
+  <!-- ============================================================
+       DETAILS MODAL
+  ============================================================= -->
+
+  <div
+    id="detailsModal"
+    class="fixed inset-0 z-[80] hidden bg-black/80 backdrop-blur-md"
+  >
+
+    <div
+      id="detailsScroll"
+      class="modal-scroll"
+    >
+
+      <div class="relative min-h-screen">
+
+        <!-- Backdrop -->
+        <div
+          id="detailBackdrop"
+          class="absolute top-0 left-0 right-0 h-[75vh] bg-cover bg-center"
+        ></div>
+
+        <div class="absolute inset-0 modal-backdrop"></div>
+
+        <!-- Close -->
+        <button
+          onclick="closeDetails()"
+          class="fixed top-5 right-5 z-20 w-11 h-11 glass rounded-xl flex items-center justify-center hover:bg-white/15"
+        >
+          <i data-lucide="x"></i>
+        </button>
+
+        <!-- Content -->
+        <div class="relative max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pt-[45vh] pb-20">
+
+          <div class="grid lg:grid-cols-[240px_1fr] gap-8">
+
+            <div class="hidden lg:block">
+              <img
+                id="detailPoster"
+                class="w-full rounded-2xl shadow-2xl border border-white/10"
+                alt=""
+              >
+            </div>
+
+            <div>
+
+              <div class="flex flex-wrap items-center gap-2 mb-4">
+
+                <span
+                  id="detailRating"
+                  class="px-3 py-1.5 rounded-lg bg-yellow-400/15 text-yellow-300 text-xs font-bold"
+                ></span>
+
+                <span id="detailYear" class="text-sm text-gray-300"></span>
+
+                <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+
+                <span id="detailRuntime" class="text-sm text-gray-300"></span>
+
+              </div>
+
+              <h1
+                id="detailTitle"
+                class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight"
+              ></h1>
+
+              <div
+                id="detailGenres"
+                class="flex flex-wrap gap-2 mt-5"
+              ></div>
+
+              <p
+                id="detailOverview"
+                class="text-gray-300 leading-7 max-w-4xl mt-6"
+              ></p>
+
+              <div class="flex flex-wrap gap-3 mt-7">
+
+                <button
+                  onclick="playCurrentTitle()"
+                  class="h-12 px-6 rounded-xl bg-red-500 hover:bg-red-400 font-bold flex items-center gap-2"
+                >
+                  <i data-lucide="play" class="fill-current w-4"></i>
+                  Watch Now
+                </button>
+
+                <button
+                  id="favoriteBtn"
+                  onclick="toggleFavorite()"
+                  class="h-12 px-5 rounded-xl glass font-semibold flex items-center gap-2"
+                >
+                  <i data-lucide="heart"></i>
+                  Favorite
+                </button>
+
+                <button
+                  onclick="saveCurrentTitle()"
+                  class="h-12 px-5 rounded-xl glass font-semibold flex items-center gap-2"
+                >
+                  <i data-lucide="bookmark"></i>
+                  Save
+                </button>
+
+                <button
+                  onclick="playTrailer()"
+                  class="h-12 px-5 rounded-xl glass font-semibold flex items-center gap-2"
+                >
+                  <i data-lucide="youtube"></i>
+                  Trailer
+                </button>
+
+                <button
+                  onclick="shareCurrentTitle()"
+                  class="h-12 px-5 rounded-xl glass font-semibold flex items-center gap-2"
+                >
+                  <i data-lucide="share-2"></i>
+                  Share
+                </button>
+
+              </div>
+
+              <!-- TV Episodes -->
+              <div
+                id="episodesSection"
+                class="hidden mt-12"
+              >
+
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-2xl font-black">
+                    Episodes
+                  </h2>
+
+                  <select
+                    id="seasonSelect"
+                    class="glass rounded-xl px-4 py-2 outline-none"
+                  ></select>
+                </div>
+
+                <div
+                  id="episodesGrid"
+                  class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"
+                ></div>
+
+              </div>
+
+
+              <!-- Cast -->
+              <section class="mt-12">
+
+                <div class="flex items-end justify-between mb-5">
+                  <div>
+                    <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+                      Cast
+                    </p>
+
+                    <h2 class="text-2xl font-black">
+                      Cast & Crew
+                    </h2>
+                  </div>
+                </div>
+
+                <div
+                  id="castRow"
+                  class="row-scroll hide-scrollbar"
+                ></div>
+
+              </section>
+
+
+              <!-- Community -->
+              <section class="mt-12 glass rounded-3xl p-6">
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+
+                  <div>
+                    <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-2">
+                      Community
+                    </p>
+
+                    <h2 class="text-2xl font-black">
+                      What do you think?
+                    </h2>
+
+                    <p class="text-sm text-gray-500 mt-2">
+                      Rate this title on your device.
+                    </p>
+                  </div>
+
+                  <div class="flex items-center gap-1" id="ratingStars">
+                    <button class="star" onclick="rateCurrent(1)">★</button>
+                    <button class="star" onclick="rateCurrent(2)">★</button>
+                    <button class="star" onclick="rateCurrent(3)">★</button>
+                    <button class="star" onclick="rateCurrent(4)">★</button>
+                    <button class="star" onclick="rateCurrent(5)">★</button>
+                  </div>
+
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
+
+                  <span
+                    id="ratingMessage"
+                    class="text-sm text-gray-500"
+                  >
+                    No rating yet
+                  </span>
+
+                  <button
+                    onclick="showToast('Discussion backend can be connected here.')"
+                    class="text-sm font-semibold hover:text-red-400"
+                  >
+                    Start discussion →
+                  </button>
+
+                </div>
+
+              </section>
+
+
+              <!-- Recommendations -->
+              <section class="mt-12">
+
+                <div class="mb-5">
+                  <p class="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">
+                    You may also like
+                  </p>
+
+                  <h2 class="text-2xl font-black">
+                    More Like This
+                  </h2>
+                </div>
+
+                <div
+                  id="recommendationsRow"
+                  class="row-scroll hide-scrollbar"
+                ></div>
+
+              </section>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       PLAYER MODAL
+  ============================================================= -->
+
+  <div
+    id="playerModal"
+    class="fixed inset-0 z-[100] hidden bg-black"
+  >
+
+    <div class="h-full flex flex-col">
+
+      <header class="h-16 shrink-0 px-4 flex items-center justify-between bg-[#0b0f19]">
+
+        <div class="flex items-center gap-3 min-w-0">
+          <button
+            onclick="closePlayer()"
+            class="w-10 h-10 rounded-xl hover:bg-white/10 flex items-center justify-center"
+          >
+            <i data-lucide="arrow-left"></i>
+          </button>
+
+          <div class="min-w-0">
+            <h2
+              id="playerTitle"
+              class="font-bold truncate"
+            >
+              Player
+            </h2>
+
+            <p
+              id="playerSubtitle"
+              class="text-xs text-gray-500 truncate"
+            ></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+
+          <select
+            id="serverSelect"
+            onchange="switchServer()"
+            class="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none"
+          >
+            <option value="youtube">YouTube Trailer</option>
+            <option value="custom">Licensed Stream</option>
+          </select>
+
+        </div>
+
+      </header>
+
+      <div class="flex-1 flex items-center justify-center bg-black p-0 sm:p-4">
+
+        <div
+          id="playerContainer"
+          class="w-full max-w-7xl player-frame"
+        ></div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- TOAST -->
+  <div
+    id="toast"
+    class="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[150] glass-heavy px-5 py-3 rounded-xl text-sm font-medium shadow-2xl"
+  ></div>
+
+</div>
+
+
+<!-- ==============================================================
+     STYLES FOR GENERATED COMPONENTS
+=============================================================== -->
+
+<style>
+  .header-action {
+    padding: .55rem .8rem;
+    border-radius: .75rem;
+    font-size: .875rem;
+    color: #9ca3af;
+    transition: .2s;
+  }
+
+  .header-action:hover {
+    color: white;
+    background: rgba(255,255,255,.06);
+  }
+
+  .drawer-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .75rem .8rem;
+    border-radius: .8rem;
+    color: #9ca3af;
+    text-align: left;
+    transition: .2s;
+    font-size: .9rem;
+  }
+
+  .drawer-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .drawer-link:hover,
+  .drawer-link.active {
+    background: rgba(239,68,68,.1);
+    color: white;
+  }
+
+  .drawer-link.active svg {
+    color: #ef4444;
+  }
+
+  .mobile-nav-item {
+    width: 54px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #7c8497;
+    font-size: 9px;
+    transition: .2s;
+  }
+
+  .mobile-nav-item svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .mobile-nav-item:hover,
+  .mobile-nav-item:active {
+    color: white;
+    background: rgba(255,255,255,.06);
+  }
+
+  #ratingStars .star {
+    font-size: 28px;
+    color: #4b5563;
+    background: transparent;
+    border: 0;
+    padding: 3px;
+  }
+
+  #ratingStars .star.selected {
+    color: #facc15;
+  }
+
+  .episode-button {
+    text-align: left;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.05);
+    transition: .2s;
+  }
+
+  .episode-button:hover {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(239,68,68,.25);
+  }
+</style>
+
+
+<!-- ==============================================================
+     JAVASCRIPT
+=============================================================== -->
+
+<script>
+/* ================================================================
+   CONFIG
+================================================================ */
+
+const TMDB_KEY = "c2e2abdddbcdbb4142f36f9bc68d1847";
+const TMDB_API = "https://api.themoviedb.org/3";
+const TMDB_IMG = "https://image.tmdb.org/t/p/";
+const YOUTUBE_EMBED = "https://www.youtube.com/embed/";
+
+const IMG = {
+  poster: path => path ? `${TMDB_IMG}w500${path}` : fallbackPoster(),
+  backdrop: path => path ? `${TMDB_IMG}original${path}` : "",
+  profile: path => path ? `${TMDB_IMG}w185${path}` : fallbackAvatar()
+};
+
+const state = {
+  heroItems: [],
+  heroIndex: 0,
+  currentTitle: null,
+  currentDetails: null,
+  currentTrailer: null,
+  searchTimer: null,
+  catalogType: "movie",
+  catalogPage: 1,
+  catalogGenre: null,
+  catalogLoading: false,
+  rating: 0
+};
+
+
+/* ================================================================
+   API
+================================================================ */
+
+async function tmdb(endpoint, params = {}) {
+
+  const url = new URL(TMDB_API + endpoint);
+
+  url.searchParams.set("api_key", TMDB_KEY);
+  url.searchParams.set("language", "en-US");
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(key, value);
+    }
+  });
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`TMDB error ${response.status}`);
+  }
+
+  return response.json();
+}
+
+
+async function safeTMDB(endpoint, params = {}, fallback = null) {
+  try {
+    return await tmdb(endpoint, params);
+  } catch (error) {
+    console.error(error);
+    return fallback;
+  }
+}
+
+
+/* ================================================================
+   FALLBACK IMAGES
+================================================================ */
+
+function fallbackPoster() {
+  return "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="500" height="750">
+        <rect width="100%" height="100%" fill="#161b26"/>
+        <text x="50%" y="50%" dominant-baseline="middle"
+          text-anchor="middle" fill="#687083"
+          font-family="Arial" font-size="26">
+          No Poster
+        </text>
+      </svg>
+    `);
+}
+
+
+function fallbackAvatar() {
+  return "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="185" height="185">
+        <rect width="100%" height="100%" fill="#161b26"/>
+        <circle cx="92" cy="70" r="30" fill="#374151"/>
+        <circle cx="92" cy="155" r="55" fill="#374151"/>
+      </svg>
+    `);
+}
+
+
+/* ================================================================
+   INITIALIZATION
+================================================================ */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  lucide.createIcons();
+
+  setupDrawer();
+  setupSearch();
+  setupHeader();
+
+  await loadHome();
+
+  renderContinueWatching();
+});
+
+
+/* ================================================================
+   HEADER
+================================================================ */
+
+function setupHeader() {
+
+  window.addEventListener("scroll", () => {
+
+    const header = document.getElementById("header");
+
+    if (window.scrollY > 40) {
+      header.classList.add("bg-[#0b0f19]/70");
+    } else {
+      header.classList.remove("bg-[#0b0f19]/70");
+    }
+
+  });
+
+}
+
+
+/* ================================================================
+   DRAWER
+================================================================ */
+
+function setupDrawer() {
+
+  const drawer = document.getElementById("drawer");
+  const overlay = document.getElementById("drawerOverlay");
+
+  document.getElementById("menuBtn").onclick = () => {
+
+    drawer.classList.remove("-translate-x-full");
+    drawer.classList.add("drawer-in");
+    overlay.classList.remove("hidden");
+
+  };
+
+  document.getElementById("closeDrawer").onclick = closeDrawer;
+
+  overlay.onclick = closeDrawer;
+
+}
+
+
+function closeDrawer() {
+
+  document.getElementById("drawer").classList.add("-translate-x-full");
+  document.getElementById("drawerOverlay").classList.add("hidden");
+
+}
+
+
+/* ================================================================
+   HOME
+================================================================ */
+
+async function loadHome() {
+
+  try {
+
+    const [
+      trending,
+      topMovies,
+      topShows,
+      popularMovies,
+      popularShows,
+      anime
+    ] = await Promise.all([
+
+      tmdb("/trending/all/week"),
+
+      tmdb("/movie/top_rated", {
+        page: 1
+      }),
+
+      tmdb("/tv/top_rated", {
+        page: 1
+      }),
+
+      tmdb("/movie/popular", {
+        page: 1
+      }),
+
+      tmdb("/tv/popular", {
+        page: 1
+      }),
+
+      tmdb("/discover/tv", {
+        page: 1,
+        with_genres: 16,
+        with_original_language: "ja",
+        sort_by: "popularity.desc"
+      })
+
+    ]);
+
+    state.heroItems = (trending.results || [])
+      .filter(item => item.backdrop_path)
+      .slice(0, 6);
+
+    renderHero();
+
+    renderRow(
+      "trendingRow",
+      (trending.results || []).slice(0, 20)
+    );
+
+    renderRankedRow(
+      "topMoviesRow",
+      (topMovies.results || []).slice(0, 10)
+    );
+
+    renderRankedRow(
+      "topShowsRow",
+      (topShows.results || []).slice(0, 10)
+    );
+
+    renderRow(
+      "popularMoviesRow",
+      (popularMovies.results || []).slice(0, 20)
+    );
+
+    renderRow(
+      "popularShowsRow",
+      (popularShows.results || []).slice(0, 20)
+    );
+
+    renderRow(
+      "animeRow",
+      (anime.results || []).slice(0, 20)
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast("TMDB could not be reached.");
+
+  }
+
+}
+
+
+/* ================================================================
+   HERO
+================================================================ */
+
+function renderHero() {
+
+  if (!state.heroItems.length) return;
+
+  const item = state.heroItems[state.heroIndex];
+
+  const title = item.title || item.name || "Untitled";
+
+  const year = (
+    item.release_date ||
+    item.first_air_date ||
+    ""
+  ).slice(0, 4);
+
+  document.getElementById("heroBackdrop").style.backgroundImage =
+    `url("${IMG.backdrop(item.backdrop_path)}")`;
+
+  document.getElementById("heroTitle").textContent = title;
+
+  document.getElementById("heroOverview").textContent =
+    item.overview || "No overview available.";
+
+  document.getElementById("heroYear").textContent =
+    year || "—";
+
+  document.getElementById("heroType").textContent =
+    item.media_type === "tv" ? "TV Series" : "Movie";
+
+  document.getElementById("heroRating").textContent =
+    `★ ${(item.vote_average || 0).toFixed(1)}`;
+
+  document.getElementById("heroWatchBtn").onclick = () => {
+    openDetails(item.id, item.media_type || "movie");
+  };
+
+  document.getElementById("heroInfoBtn").onclick = () => {
+    openDetails(item.id, item.media_type || "movie");
+  };
+
+  const dots = document.getElementById("heroDots");
+
+  dots.innerHTML = state.heroItems
+    .map((_, index) => `
+      <button
+        onclick="setHero(${index})"
+        class="h-1.5 rounded-full transition-all ${
+          index === state.heroIndex
+            ? "w-8 bg-white"
+            : "w-2 bg-white/30"
+        }"
+      ></button>
+    `)
+    .join("");
+
+}
+
+
+function setHero(index) {
+
+  state.heroIndex = index;
+
+  renderHero();
+
+}
+
+
+setInterval(() => {
+
+  if (!state.heroItems.length) return;
+
+  state.heroIndex =
+    (state.heroIndex + 1) %
+    state.heroItems.length;
+
+  renderHero();
+
+}, 7000);
+
+
+/* ================================================================
+   CARD RENDERING
+================================================================ */
+
+function renderRow(containerId, items) {
+
+  const container = document.getElementById(containerId);
+
+  if (!container) return;
+
+  container.innerHTML = items
+    .filter(item => item.poster_path)
+    .map(item => posterCard(item))
+    .join("");
+
+  lucide.createIcons();
+
+}
+
+
+function renderRankedRow(containerId, items) {
+
+  const container = document.getElementById(containerId);
+
+  container.innerHTML = items
+    .filter(item => item.poster_path)
+    .map((item, index) => rankedCard(item, index + 1))
+    .join("");
+
+  lucide.createIcons();
+
+}
+
+
+function posterCard(item) {
+
+  const type = item.media_type ||
+    (item.first_air_date !== undefined ? "tv" : "movie");
+
+  const title = item.title || item.name || "Untitled";
+
+  return `
+    <article
+      class="poster-card cursor-pointer group fade-in"
+      onclick="openDetails(${item.id}, '${type}')"
+    >
+
+      <div class="relative overflow-hidden rounded-xl">
+
+        <img
+          src="${IMG.poster(item.poster_path)}"
+          alt="${escapeHTML(title)}"
+          loading="lazy"
+          class="poster w-full rounded-xl group-hover:scale-[1.03] transition duration-500"
+          onerror="this.src='${fallbackPoster()}'"
+        >
+
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+
+        <div class="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition">
+
+          <div class="flex items-center gap-1 text-yellow-300 text-xs font-bold">
+            ★ ${(item.vote_average || 0).toFixed(1)}
+          </div>
+
+        </div>
+
+      </div>
+
+      <h3 class="font-semibold text-sm mt-3 truncate">
+        ${escapeHTML(title)}
+      </h3>
+
+      <p class="text-xs text-gray-500 mt-1">
+        ${(item.release_date || item.first_air_date || "").slice(0,4)}
+      </p>
+
+    </article>
+  `;
+
+}
+
+
+function rankedCard(item, rank) {
+
+  const type = item.media_type ||
+    (item.first_air_date !== undefined ? "tv" : "movie");
+
+  const title = item.title || item.name || "Untitled";
+
+  return `
+    <article
+      class="number-card relative cursor-pointer group"
+      onclick="openDetails(${item.id}, '${type}')"
+    >
+
+      <span class="rank-number">
+        ${rank}
