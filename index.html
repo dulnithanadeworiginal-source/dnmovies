@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19">
+  <title>Dulo — Movies & Shows</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #161b26;
+      --card2: #1b2230;
+      --accent: #ef4444;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: #374151 transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: #fff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .glass {
+      background: rgba(22, 27, 38, .78);
+      border: 1px solid rgba(255,255,255,.07);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      min-height: 570px;
+      position: relative;
+      overflow: hidden;
+      background: #111827;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: opacity .45s ease, transform 8s ease;
+      transform: scale(1.02);
+    }
+
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(11,15,25,.98) 0%, rgba(11,15,25,.82) 30%, rgba(11,15,25,.28) 68%, rgba(11,15,25,.78) 100%),
+        linear-gradient(0deg, #0b0f19 0%, transparent 45%, rgba(11,15,25,.35) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 680px;
+      padding-top: 180px;
+      padding-bottom: 90px;
+    }
+
+    .fade-up {
+      animation: fadeUp .55s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: linear-gradient(145deg, rgba(25,31,44,.96), rgba(18,23,34,.96));
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 17px;
+      overflow: hidden;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(239,68,68,.38);
+      box-shadow: 0 18px 45px rgba(0,0,0,.28);
+    }
+
+    .poster {
+      aspect-ratio: 2 / 3;
+      width: 100%;
+      object-fit: cover;
+      display: block;
+      background: #111827;
+    }
+
+    .row-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 5px 2px 15px;
+      scroll-behavior: smooth;
+      overscroll-behavior-x: contain;
+    }
+
+    .row-scroll::-webkit-scrollbar {
+      height: 5px;
+    }
+
+    .row-scroll::-webkit-scrollbar-thumb {
+      background: #303847;
+      border-radius: 20px;
+    }
+
+    .movie-card {
+      flex: 0 0 155px;
+    }
+
+    .rank-card {
+      flex: 0 0 210px;
+      position: relative;
+    }
+
+    .rank-number {
+      position: absolute;
+      z-index: 1;
+      left: -7px;
+      bottom: -10px;
+      font-size: 105px;
+      line-height: .8;
+      font-weight: 1000;
+      color: rgba(255,255,255,.07);
+      pointer-events: none;
+    }
+
+    .rank-card .poster {
+      margin-left: 22px;
+      width: calc(100% - 22px);
+    }
+
+    .rank-info {
+      margin-left: 22px;
+    }
+
+    .section {
+      margin-top: 34px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 13px;
+      letter-spacing: -.02em;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: rgba(255,255,255,.09);
+      color: #e5e7eb;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .rating {
+      color: #facc15;
+      background: rgba(250,204,21,.11);
+    }
+
+    .red-btn {
+      background: var(--accent);
+      transition: transform .2s, background .2s;
+    }
+
+    .red-btn:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
+    .search-results {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 8px);
+      max-height: 440px;
+      overflow-y: auto;
+      z-index: 80;
+      border-radius: 18px;
+    }
+
+    .drawer {
+      position: fixed;
+      z-index: 100;
+      top: 0;
+      left: 0;
+      width: min(340px, 88vw);
+      height: 100dvh;
+      transform: translateX(-105%);
+      transition: transform .3s ease;
+      background: rgba(12,16,26,.97);
+      border-right: 1px solid rgba(255,255,255,.08);
+      box-shadow: 20px 0 60px rgba(0,0,0,.35);
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(0,0,0,.65);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0,0,0,.82);
+      backdrop-filter: blur(9px);
+    }
+
+    .modal-layer.open {
+      display: flex;
+    }
+
+    .detail-modal {
+      width: min(1050px, 100%);
+      max-height: 94dvh;
+      overflow-y: auto;
+      border-radius: 24px;
+      background: #101521;
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: 0 30px 100px rgba(0,0,0,.55);
+      animation: modalIn .3s ease both;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.97) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .detail-hero {
+      min-height: 440px;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .detail-gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(10,14,22,.97), rgba(10,14,22,.68) 48%, rgba(10,14,22,.28)),
+        linear-gradient(0deg, #101521 0%, transparent 50%);
+    }
+
+    .detail-content {
+      position: relative;
+      z-index: 2;
+      max-width: 640px;
+      padding: 80px 35px 45px;
+    }
+
+    .cast-avatar {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 50%;
+      background: #1f2937;
+      border: 2px solid rgba(255,255,255,.1);
+    }
+
+    .bottom-nav {
+      display: none;
+    }
+
+    .player-video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      background: #000;
+    }
+
+    .server-btn.active {
+      background: var(--accent);
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 500;
+      left: 50%;
+      bottom: 25px;
+      transform: translate(-50%, 20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s ease;
+      background: rgba(17,24,39,.96);
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .app-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      font-weight: 1000;
+      font-size: 19px;
+    }
+
+    .live-card {
+      min-width: 245px;
+      flex: 0 0 245px;
+      border-radius: 17px;
+      overflow: hidden;
+      background: #151b28;
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .live-thumb {
+      height: 125px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .live-thumb::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,.7), transparent);
+    }
+
+    .progress-track {
+      height: 4px;
+      background: rgba(255,255,255,.12);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+    }
+
+    @media (max-width: 767px) {
+      .desktop-nav {
+        display: none;
+      }
+
+      .hero {
+        min-height: 610px;
+      }
+
+      .hero-gradient {
+        background:
+          linear-gradient(0deg, #0b0f19 2%, rgba(11,15,25,.78) 40%, rgba(11,15,25,.18) 100%);
+      }
+
+      .hero-content {
+        padding-top: 290px;
+        padding-bottom: 45px;
+      }
+
+      .movie-card {
+        flex-basis: 132px;
+      }
+
+      .rank-card {
+        flex-basis: 180px;
+      }
+
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        z-index: 120;
+        left: 10px;
+        right: 10px;
+        bottom: max(10px, env(safe-area-inset-bottom));
+        height: 66px;
+        border-radius: 22px;
+        align-items: center;
+        justify-content: space-around;
+        background: rgba(17,23,34,.88);
+        border: 1px solid rgba(255,255,255,.08);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 15px 50px rgba(0,0,0,.45);
+      }
+
+      .bottom-nav button {
+        color: #8d98aa;
+        font-size: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        align-items: center;
+      }
+
+      .bottom-nav button.active {
+        color: #fff;
+      }
+
+      .detail-hero {
+        min-height: 590px;
+      }
+
+      .detail-content {
+        padding: 270px 20px 30px;
+      }
+
+      .cast-avatar {
+        width: 62px;
+        height: 62px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Drawer -->
+  <div id="drawerBackdrop" class="drawer-backdrop"></div>
+
+  <aside id="drawer" class="drawer p-5 overflow-y-auto">
+    <div class="flex items-center justify-between mb-7">
+      <div class="flex items-center gap-3">
+        <div class="app-logo">D</div>
+        <div>
+          <div class="font-black text-xl">Dulo</div>
+          <div class="text-xs text-slate-500">Movies & Shows</div>
+        </div>
+      </div>
+      <button id="closeDrawer" class="p-2 rounded-xl bg-white/5">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <div class="space-y-1">
+      <button data-nav="home" class="drawer-link flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="home"></i> Home
+      </button>
+      <button data-nav="live" class="drawer-link flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="radio"></i> Live TV & Sports
+      </button>
+      <button data-nav="movies" class="drawer-link flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="film"></i> Movies
+      </button>
+      <button data-nav="shows" class="drawer-link flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="tv"></i> Shows
+      </button>
+      <button data-nav="anime" class="drawer-link flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="sparkles"></i> Anime
+      </button>
+      <button data-nav="library" class="drawer-link flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="bookmark"></i> Library
+      </button>
+      <button class="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="users"></i> Watch Parties
+      </button>
+      <button class="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="compass"></i> Discover
+      </button>
+      <button class="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="play-square"></i> Shorts
+      </button>
+      <button class="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="calendar-days"></i> Calendar
+      </button>
+      <button class="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="tags"></i> Genres
+      </button>
+      <button class="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-left">
+        <i data-lucide="map"></i> Roadmap
+      </button>
+    </div>
+
+    <div class="mt-7 pt-5 border-t border-white/5">
+      <div class="text-xs uppercase tracking-widest text-slate-500 mb-3">Channels & Apps</div>
+      <div class="grid grid-cols-2 gap-2">
+        <button class="glass rounded-xl p-3 text-sm text-left">Netflix</button>
+        <button class="glass rounded-xl p-3 text-sm text-left">Prime Video</button>
+        <button class="glass rounded-xl p-3 text-sm text-left">Crunchyroll</button>
+        <button class="glass rounded-xl p-3 text-sm text-left">AMC</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-[#0b0f19] to-transparent">
+    <div class="max-w-[1500px] mx-auto px-4 md:px-7 py-4">
+      <div class="flex items-center gap-4">
+        <button id="openDrawer" class="glass p-3 rounded-xl">
+          <i data-lucide="menu"></i>
+        </button>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <div class="app-logo">D</div>
+          <span class="font-black text-xl hidden sm:block">Dulo</span>
+        </div>
+
+        <nav class="desktop-nav flex items-center gap-5 ml-5 text-sm text-slate-300">
+          <button data-nav="home" class="hover:text-white">Home</button>
+          <button data-nav="movies" class="hover:text-white">Movies</button>
+          <button data-nav="shows" class="hover:text-white">Shows</button>
+          <button data-nav="anime" class="hover:text-white">Anime</button>
+          <button data-nav="live" class="hover:text-white">Live</button>
+        </nav>
+
+        <div class="relative ml-auto w-full max-w-[330px]">
+          <div class="glass rounded-2xl flex items-center px-3">
+            <i data-lucide="search" class="w-5 text-slate-400"></i>
+            <input id="searchInput"
+                   autocomplete="off"
+                   class="w-full bg-transparent outline-none px-3 py-3 text-sm"
+                   placeholder="Search movies & shows...">
+          </div>
+          <div id="searchResults" class="search-results glass hidden"></div>
+        </div>
+
+        <button id="libraryButton" class="glass p-3 rounded-xl hidden sm:block">
+          <i data-lucide="bookmark"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- Hero -->
+    <section id="hero" class="hero">
+      <div id="heroBg" class="hero-bg"></div>
+      <div class="hero-gradient"></div>
+
+      <div class="max-w-[1500px] mx-auto px-5 md:px-8">
+        <div id="heroContent" class="hero-content fade-up">
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="badge" id="heroType">MOVIE</span>
+            <span class="badge" id="heroYear">2024</span>
+            <span class="badge rating" id="heroRating">★ 8.0</span>
+          </div>
+
+          <h1 id="heroTitle" class="text-4xl md:text-6xl font-black tracking-tight leading-[.98]">
+            Movie
+          </h1>
+
+          <p id="heroOverview" class="text-slate-300 text-sm md:text-base leading-7 mt-5 max-w-xl">
+            Discover popular movies and shows.
+          </p>
+
+          <div class="flex flex-wrap gap-3 mt-6">
+            <button id="heroWatch" class="red-btn px-5 py-3 rounded-xl font-bold flex items-center gap-2">
+              <i data-lucide="play" class="fill-current w-4"></i>
+              Watch Now
+            </button>
+            <button id="heroInfo" class="glass px-5 py-3 rounded-xl font-bold flex items-center gap-2">
+              <i data-lucide="info" class="w-4"></i>
+              More Info
+            </button>
+          </div>
+
+          <div id="heroDots" class="flex gap-2 mt-7"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main content -->
+    <div class="max-w-[1500px] mx-auto px-5 md:px-8 pb-32">
+
+      <section id="continueSection" class="section hidden">
+        <div class="section-title">Continue Watching</div>
+        <div id="continueRow" class="row-scroll"></div>
+      </section>
+
+      <section id="liveSection" class="section">
+        <div class="flex items-center justify-between mb-3">
+          <div class="section-title mb-0">Live Sports & TV</div>
+          <span class="text-xs text-red-400 flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> LIVE
+          </span>
+        </div>
+        <div id="liveRow" class="row-scroll"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Streaming Apps</div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="glass rounded-2xl p-5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-600 grid place-items-center font-black">N</div>
+            <span class="font-bold">Netflix</span>
+          </div>
+          <div class="glass rounded-2xl p-5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 grid place-items-center font-black">P</div>
+            <span class="font-bold">Prime Video</span>
+          </div>
+          <div class="glass rounded-2xl p-5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500 grid place-items-center font-black">D</div>
+            <span class="font-bold">Disney+</span>
+          </div>
+          <div class="glass rounded-2xl p-5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-orange-500 grid place-items-center font-black">C</div>
+            <span class="font-bold">Crunchyroll</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Top 10 Movies</div>
+        <div id="topMoviesRow" class="row-scroll"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Top 10 TV Shows</div>
+        <div id="topShowsRow" class="row-scroll"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Popular Movies</div>
+        <div id="moviesRow" class="row-scroll"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Popular Shows</div>
+        <div id="showsRow" class="row-scroll"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Popular Anime</div>
+        <div id="animeRow" class="row-scroll"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Your Library</div>
+        <div id="libraryRow" class="row-scroll">
+          <div class="text-sm text-slate-500 py-5">Your saved titles will appear here.</div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Mobile Navigation -->
+  <nav class="bottom-nav">
+    <button data-nav="home" class="active">
+      <i data-lucide="home"></i><span>Home</span>
+    </button>
+    <button data-nav="live">
+      <i data-lucide="radio"></i><span>Live</span>
+    </button>
+    <button data-nav="movies">
+      <i data-lucide="film"></i><span>Movies</span>
+    </button>
+    <button data-nav="shows">
+      <i data-lucide="tv"></i><span>Shows</span>
+    </button>
+    <button data-nav="anime">
+      <i data-lucide="sparkles"></i><span>Anime</span>
+    </button>
+    <button data-nav="library">
+      <i data-lucide="bookmark"></i><span>Saved</span>
+    </button>
+  </nav>
+
+  <!-- Details Modal -->
+  <div id="detailsLayer" class="modal-layer">
+    <div class="detail-modal">
+      <div id="detailHero" class="detail-hero">
+        <div class="detail-gradient"></div>
+
+        <button id="closeDetails" class="absolute top-4 right-4 z-10 glass rounded-full p-3">
+          <i data-lucide="x"></i>
+        </button>
+
+        <div id="detailContent" class="detail-content">
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span id="detailType" class="badge"></span>
+            <span id="detailYear" class="badge"></span>
+            <span id="detailRating" class="badge rating"></span>
+          </div>
+
+          <h2 id="detailTitle" class="text-3xl md:text-5xl font-black"></h2>
+
+          <div id="detailGenres" class="flex flex-wrap gap-2 mt-4"></div>
+
+          <p id="detailOverview" class="text-slate-300 leading-7 text-sm mt-5 max-w-2xl"></p>
+
+          <div class="flex flex-wrap gap-2 mt-6">
+            <button id="detailWatch" class="red-btn px-4 py-3 rounded-xl font-bold flex items-center gap-2">
+              <i data-lucide="play" class="fill-current w-4"></i> Watch
+            </button>
+            <button id="favoriteBtn" class="glass px-4 py-3 rounded-xl font-bold flex items-center gap-2">
+              <i data-lucide="heart"></i> Favorite
+            </button>
+            <button id="saveBtn" class="glass px-4 py-3 rounded-xl font-bold flex items-center gap-2">
+              <i data-lucide="bookmark"></i> Save
+            </button>
+            <button id="trailerBtn" class="glass px-4 py-3 rounded-xl font-bold flex items-center gap-2">
+              <i data-lucide="youtube"></i> Trailer
+            </button>
+            <button id="shareBtn" class="glass px-4 py-3 rounded-xl font-bold flex items-center gap-2">
+              <i data-lucide="share-2"></i> Share
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-5 md:p-8">
+
+        <div id="episodeSection" class="hidden mb-8">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-lg">Episodes</h3>
+            <select id="seasonSelect" class="glass rounded-xl px-3 py-2 bg-transparent outline-none"></select>
+          </div>
+          <div id="episodeList" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+        </div>
+
+        <section>
+          <h3 class="font-bold text-lg mb-4">Cast</h3>
+          <div id="castRow" class="row-scroll"></div>
+        </section>
+
+        <section class="mt-8">
+          <h3 class="font-bold text-lg mb-3">Community</h3>
+          <div class="glass rounded-2xl p-5">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <div class="text-sm text-slate-400">Rate this title</div>
+                <div id="stars" class="flex gap-1 mt-2">
+                  <button data-star="1">★</button>
+                  <button data-star="2">★</button>
+                  <button data-star="3">★</button>
+                  <button data-star="4">★</button>
+                  <button data-star="5">★</button>
+                </div>
+              </div>
+              <button class="glass px-4 py-2 rounded-xl text-sm">
+                <i data-lucide="message-circle" class="inline w-4"></i>
+                Join discussion
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-8">
+          <h3 class="font-bold text-lg mb-4">More Like This</h3>
+          <div id="recommendRow" class="row-scroll"></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Modal -->
+  <div id="playerLayer" class="modal-layer">
+    <div class="w-full max-w-5xl">
+      <div class="flex justify-end mb-3">
+        <button id="closePlayer" class="glass rounded-full p-3">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="bg-black rounded-2xl overflow-hidden border border-white/10">
+        <div id="playerFrame"></div>
+      </div>
+
+      <div class="glass mt-3 rounded-2xl p-3">
+        <div class="text-xs text-slate-400 mb-2">Video source</div>
+        <div id="serverButtons" class="flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trailer Modal -->
+  <div id="trailerLayer" class="modal-layer">
+    <div class="w-full max-w-5xl">
+      <div class="flex justify-end mb-3">
+        <button id="closeTrailer" class="glass rounded-full p-3">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div id="trailerFrame" class="bg-black rounded-2xl overflow-hidden"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /*
+   * The initial catalog is deliberately local so the interface never waits
+   * for a network request before becoming usable.
+   *
+   * The image URLs below are TMDB CDN assets. If an ISP blocks the API host,
+   * the image CDN can still continue to serve these cached catalog assets.
+   */
+  const INITIAL_DATA = [
+    {
+      id: 603,
+      type: "movie",
+      title: "The Matrix",
+      year: 1999,
+      rating: 8.7,
+      genres: ["Action", "Science Fiction"],
+      overview: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+      poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/fNG7i7RqMErkcqho3dZy3E5D3eJ.jpg",
+      trailer: "https://www.youtube.com/embed/vKQi3bBA1y8",
+      stream: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      cast: [
+        ["Keanu Reeves", "Neo", "https://image.tmdb.org/t/p/w185/4D0PpNI0kmP58hgrwGC3wCjxhnm.jpg"],
+        ["Laurence Fishburne", "Morpheus", "https://image.tmdb.org/t/p/w185/8suOhUmPbfKqDQ17jQ1Gy0m7q0b.jpg"],
+        ["Carrie-Anne Moss", "Trinity", "https://image.tmdb.org/t/p/w185/xbK1w9z2K2oY3JfQqYy9s4m3mJ.jpg"]
+      ]
+    },
+    {
+      id: 157336,
+      type: "movie",
+      title: "Interstellar",
+      year: 2014,
+      rating: 8.7,
+      genres: ["Adventure", "Drama", "Science Fiction"],
+      overview: "A team of explorers travels through a wormhole in space in an attempt to ensure humanity's survival.",
+      poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5m6p9z.jpg",
+      trailer: "https://www.youtube.com/embed/zSWdZVtXT7E",
+      stream: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      cast: [
+        ["Matthew McConaughey", "Cooper", "https://image.tmdb.org/t/p/w185/lyUyVARQKhGxaxy0FbPJCQR2I0H.jpg"],
+        ["Anne Hathaway", "Brand", "https://image.tmdb.org/t/p/w185/4P5c8lTq0mY7m0lR0Z9Y2u2s5wA.jpg"]
+      ]
+    },
+    {
+      id: 27205,
+      type: "movie",
+      title: "Inception",
+      year: 2010,
+      rating: 8.4,
+      genres: ["Action", "Science Fiction", "Thriller"],
+      overview: "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
+      poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
+      trailer: "https://www.youtube.com/embed/YoHD9XEInc0",
+      stream: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      cast: [
+        ["Leonardo DiCaprio", "Cobb", "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg"],
+        ["Joseph Gordon-Levitt", "Arthur", "https://image.tmdb.org/t/p/w185/4U9G4YwTlIEbE5e0K5g9m3q8M6k.jpg"]
+      ]
+    },
+    {
+      id: 155,
+      type: "movie",
+      title: "The Dark Knight",
+      year: 2008,
+      rating: 9.0,
+      genres: ["Drama", "Action", "Crime"],
+      overview: "Batman faces a criminal mastermind whose reign of chaos pushes Gotham and its heroes to their limits.",
+      poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/nMKdUUepR0i5zn0y1T4CsSB5ez.jpg",
+      trailer: "https://www.youtube.com/embed/EXeTwQWrcwY",
+      stream: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+      cast: [
+        ["Christian Bale", "Bruce Wayne", "https://image.tmdb.org/t/p/w185/bnLFz6p7L6Xy6w8z0J8G7Y2j2h.jpg"],
+        ["Heath Ledger", "Joker", "https://image.tmdb.org/t/p/w185/5Y9HnYYa9jF4NunY9j5w8k2JQ4.jpg"]
+      ]
+    },
+    {
+      id: 19995,
+      type: "movie",
+      title: "Avatar",
+      year: 2009,
+      rating: 7.6,
+      genres: ["Action", "Adventure", "Fantasy"],
+      overview: "A marine on an alien world becomes caught between following orders and protecting a new civilization.",
+      poster: "https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/vL5LR6WdxWPjLPFRLe133jXWsh5.jpg",
+      trailer: "https://www.youtube.com/embed/5PSNL1qE6VY",
+      stream: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+      cast: [
+        ["Sam Worthington", "Jake Sully", "https://image.tmdb.org/t/p/w185/9Z3M7QY3Wm5zX8Q5T4F6R4k2p4.jpg"],
+        ["Zoe Saldaña", "Neytiri", "https://image.tmdb.org/t/p/w185/6G2yM3z8fG9w9pY4wY4nY4k8x4.jpg"]
+      ]
+    },
+    {
+      id: 680,
+      type: "movie",
+      title: "Pulp Fiction",
+      year: 1994,
+      rating: 8.9,
+      genres: ["Thriller", "Crime"],
+      overview: "The lives of several criminals, gangsters and other characters intertwine in a wildly nonlinear crime story.",
+      poster: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg",
+      trailer: "https://www.youtube.com/embed/s7EdQ4FqbhY",
+      stream: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+      cast: [
+        ["John Travolta", "Vincent Vega", "https://image.tmdb.org/t/p/w185/5Q8DwJYQ6y9M0H9Q4T4Y4G4k5.jpg"],
+        ["Samuel L. Jackson", "Jules Winnfield", "https://image.tmdb.org/t/p/w185/AiAYAqwpM5x3L3M4G3P6k8j3.jpg"]
+      ]
+    },
+    {
+      id: 496243,
+      type: "movie",
+      title: "Parasite",
+      year: 2019,
+      rating: 8.5,
+      genres: ["Comedy", "Thriller", "Drama"],
+      overview: "A struggling family slowly infiltrates the household of a wealthy family, with unexpected consequences.",
+      poster: "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/ApiqF9QJ2h8h1K5T6q0oV3zY2b.jpg",
+      trailer: "https://www.youtube.com/embed/5xH0HfJHsaY",
+      stream: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+      cast: [
+        ["Song Kang-ho", "Kim Ki-taek", "https://image.tmdb.org/t/p/w185/5Z8D0xJ7g6k9T3m8Y7x2.jpg"],
+        ["Choi Woo-shik", "Kim Ki-woo", "https://image.tmdb.org/t/p/w185/3G5j6k9Q8x7.jpg"]
+      ]
+    },
+    {
+      id: 1399,
+      type: "tv",
+      title: "Game of Thrones",
+      year: 2011,
+      rating: 8.4,
+      genres: ["Drama", "Fantasy", "Adventure"],
+      overview: "Nine noble families fight for control over the mythical lands of Westeros while an ancient enemy returns.",
+      poster: "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/suopoADq0k8YZr4dQx7xY6m3zP.jpg",
+      trailer: "https://www.youtube.com/embed/KPLWWIOCOOQ",
+      cast: [
+        ["Emilia Clarke", "Daenerys Targaryen", "https://image.tmdb.org/t/p/w185/1KQSb3Z2h4J5M7N9R8T2.jpg"],
+        ["Kit Harington", "Jon Snow", "https://image.tmdb.org/t/p/w185/4D4D5R7G8F9H.jpg"]
+      ],
+      seasons: 8
+    },
+    {
+      id: 1396,
+      type: "tv",
+      title: "Breaking Bad",
+      year: 2008,
+      rating: 9.5,
+      genres: ["Drama", "Crime"],
+      overview: "A chemistry teacher diagnosed with cancer turns to manufacturing illegal drugs to secure his family's future.",
+      poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC6Yp0h3f4uXq7xJ9k8.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      trailer: "https://www.youtube.com/embed/HhesaQXLuRY",
+      cast: [
+        ["Bryan Cranston", "Walter White", "https://image.tmdb.org/t/p/w185/83Y9Y4Q6x7z8m3k5.jpg"],
+        ["Aaron Paul", "Jesse Pinkman", "https://image.tmdb.org/t/p/w185/8l5K6j7Q8m9.jpg"]
+      ],
+      seasons: 5
+    },
+    {
+      id: 66732,
+      type: "tv",
+      title: "Stranger Things",
+      year: 2016,
+      rating: 8.6,
+      genres: ["Drama", "Mystery", "Science Fiction"],
+      overview: "A group of young friends uncovers supernatural mysteries surrounding their small town.",
+      poster: "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/56v2KjBlU4XaOv9rVXEYx2f8Z8m.jpg",
+      trailer: "https://www.youtube.com/embed/b9EkMc79ZSU",
+      cast: [
+        ["Millie Bobby Brown", "Eleven", "https://image.tmdb.org/t/p/w185/4YQ7F6m9R8.jpg"],
+        ["Finn Wolfhard", "Mike Wheeler", "https://image.tmdb.org/t/p/w185/3P7M8K9Q.jpg"]
+      ],
+      seasons: 4
+    },
+    {
+      id: 94605,
+      type: "tv",
+      title: "Arcane",
+      year: 2021,
+      rating: 8.7,
+      genres: ["Animation", "Action", "Fantasy"],
+      overview: "Two sisters find themselves on opposite sides of a growing conflict between two cities.",
+      poster: "https://image.tmdb.org/t/p/w500/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/1Dk6f0W8L7Y5r4e3t2.jpg",
+      trailer: "https://www.youtube.com/embed/fXmAurh012s",
+      cast: [
+        ["Hailee Steinfeld", "Vi", "https://image.tmdb.org/t/p/w185/4J8Q6m.jpg"],
+        ["Ella Purnell", "Jinx", "https://image.tmdb.org/t/p/w185/7K3m9.jpg"]
+      ],
+      seasons: 2
+    },
+    {
+      id: 37854,
+      type: "tv",
+      title: "One Piece",
+      year: 1999,
+      rating: 8.7,
+      genres: ["Animation", "Action", "Adventure"],
+      overview: "Monkey D. Luffy and his crew sail across the Grand Line searching for the legendary treasure known as One Piece.",
+      poster: "https://image.tmdb.org/t/p/w500/cMD9Ygz11zjJzAovURpO75Qg7rT.jpg",
+      backdrop: "https://image.tmdb.org/t/p/original/3h5p4M8Y6K2z9Q1W.jpg",
+      trailer: "https://www.youtube.com/embed/S8_YwFLCh4U",
+      cast: [
+        ["Mayumi Tanaka", "Monkey D. Luffy", "https://image.tmdb.org/t/p/w185/3k9Q.jpg"],
+        ["Kazuya Nakai", "Roronoa Zoro", "https://image.tmdb.org/t/p/w185/8j4K.jpg"]
+      ],
+      seasons: 20
+    }
+  ];
+
+  const LIVE_CHANNELS = [
+    {
+      title: "Live Sports",
+      subtitle: "Official live source",
+      icon: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=900",
+      url: "https://www.youtube.com/embed/live_stream?channel=UCqZQlzSHbVJrwrn5XvzrzcA"
+    },
+    {
+      title: "Sports News",
+      subtitle: "Live coverage",
+      icon: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=900",
+      url: "https://www.youtube.com/embed/live_stream?channel=UCwWhs_6x42TyRM4Wstoq8HA"
+    },
+    {
+      title: "News Live",
+      subtitle: "Live channel",
+      icon: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=900",
+      url: "https://www.youtube.com/embed/live_stream?channel=UCupvZG-5ko_eiXAupbDfxWw"
+    },
+    {
+      title: "Nature Live",
+      subtitle: "Live camera",
+      icon: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=900",
+      url: "https://www.youtube.com/embed/live_stream?channel=UCJplp5SjeGSdVdwsfb9Q7lQ"
+    }
+  ];
+
+  const state = {
+    catalog: [...INITIAL_DATA],
+    heroIndex: 0,
+    current: null,
+    favorites: new Set(JSON.parse(localStorage.getItem("dulo_favorites") || "[]")),
+    saved: new Set(JSON.parse(localStorage.getItem("dulo_saved") || "[]")),
+    continueWatching: JSON.parse(localStorage.getItem("dulo_continue") || "[]"),
+    searchTimer: null,
+    heroTimer: null
+  };
+
+  const $ = id => document.getElementById(id);
+
+  function escapeHTML(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function normalizeItem(item, typeOverride = null) {
+    const type = typeOverride || item.type || (item.media_type === "tv" ? "tv" : "movie");
+    return {
+      id: Number(item.id),
+      type,
+      title: item.title || item.name || "Untitled",
+      year: Number((item.release_date || item.first_air_date || "").slice(0, 4)) || item.year || "",
+      rating: Number(item.vote_average || item.rating || 0),
+      overview: item.overview || "No overview available.",
+      poster: item.poster || (item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : ""),
+      backdrop: item.backdrop || (item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : ""),
+      genres: item.genres?.map(g => typeof g === "string" ? g : g.name) || [],
+      trailer: item.trailer || "",
+      cast: item.cast || [],
+      seasons: item.number_of_seasons || item.seasons || 0
+    };
+  }
+
+  function uniqueCatalog(items) {
+    const map = new Map();
+    [...state.catalog, ...items].forEach(item => {
+      const normalized = normalizeItem(item);
+      if (normalized.id) map.set(`${normalized.type}-${normalized.id}`, normalized);
+    });
+    return [...map.values()];
+  }
+
+  function saveStorage() {
+    localStorage.setItem("dulo_favorites", JSON.stringify([...state.favorites]));
+    localStorage.setItem("dulo_saved", JSON.stringify([...state.saved]));
+    localStorage.setItem("dulo_continue", JSON.stringify(state.continueWatching));
+  }
+
+  function toast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => el.classList.remove("show"), 2200);
+  }
+
+  function openDrawer() {
+    $("drawer").classList.add("open");
+    $("drawerBackdrop").classList.add("open");
+  }
+
+  function closeDrawer() {
+    $("drawer").classList.remove("open");
+    $("drawerBackdrop").classList.remove("open");
+  }
+
+  function renderHero() {
+    const item = state.catalog[state.heroIndex % state.catalog.length];
+    if (!item) return;
+
+    const bg = $("heroBg");
+    bg.style.opacity = "0";
+
+    setTimeout(() => {
+      bg.style.backgroundImage = `url("${item.backdrop || item.poster}")`;
+      bg.style.opacity = "1";
+
+      $("heroType").textContent = item.type === "tv" ? "TV SERIES" : "MOVIE";
+      $("heroYear").textContent = item.year || "—";
+      $("heroRating").textContent = `★ ${item.rating ? item.rating.toFixed(1) : "N/A"}`;
+      $("heroTitle").textContent = item.title;
+      $("heroOverview").textContent = item.overview;
+
+      $("heroContent").classList.remove("fade-up");
+      void $("heroContent").offsetWidth;
+      $("heroContent").classList.add("fade-up");
+
+      $("heroWatch").onclick = () => openPlayer(item);
+      $("heroInfo").onclick = () => openDetails(item);
+
+      $("heroDots").innerHTML = state.catalog.slice(0, 6).map((_, i) =>
+        `<button data-hero="${i}" class="h-1.5 rounded-full transition-all ${i === state.heroIndex % 6 ? "w-8 bg-white" : "w-3 bg-white/30"}"></button>`
+      ).join("");
+
+      document.querySelectorAll("[data-hero]").forEach(btn => {
+        btn.onclick = () => {
+          state.heroIndex = Number(btn.dataset.hero);
+          renderHero();
+          restartHeroTimer();
+        };
+      });
+    }, 100);
+  }
+
+  function restartHeroTimer() {
+    clearInterval(state.heroTimer);
+    state.heroTimer = setInterval(() => {
+      state.heroIndex = (state.heroIndex + 1) % Math.min(state.catalog.length, 10);
+      renderHero();
+    }, 7000);
+  }
+
+  function movieCard(item, rank = null) {
+    const safe = escapeHTML(item.title);
+    const poster = item.poster || item.backdrop || "";
+    return `
+      <article class="${rank ? "rank-card" : "movie-card"} card cursor-pointer"
+               data-item-id="${item.id}" data-item-type="${item.type}">
+        ${rank ? `<div class="rank-number">${rank}</div>` : ""}
+        <img class="poster"
+             src="${escapeHTML(poster)}"
+             alt="${safe}"
+             loading="lazy"
+             onerror="this.style.opacity='.25'">
+        <div class="${rank ? "rank-info" : ""} p-2.5">
+          <div class="font-bold text-sm truncate">${safe}</div>
+          <div class="flex items-center justify-between mt-1 text-xs text-slate-500">
+            <span>${escapeHTML(item.year || "—")}</span>
+            <span class="text-yellow-400">★ ${item.rating ? item.rating.toFixed(1) : "—"}</span>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function bindCards(container) {
+    container.querySelectorAll("[data-item-id]").forEach(card => {
+      card.onclick = () => {
+        const item = state.catalog.find(x =>
+          x.id === Number(card.dataset.itemId) &&
+          x.type === card.dataset.itemType
+        );
+        if (item) openDetails(item);
+      };
+    });
+  }
+
+  function renderRows() {
+    const movies = state.catalog.filter(x => x.type === "movie");
+    const shows = state.catalog.filter(x => x.type === "tv");
+    const anime = state.catalog.filter(x =>
+      /anime|animation/i.test((x.genres || []).join(" ")) ||
+      ["One Piece", "Arcane"].includes(x.title)
+    );
+
+    $("moviesRow").innerHTML = movies.slice(0, 14).map(movieCard).join("");
+    $("showsRow").innerHTML = shows.slice(0, 14).map(movieCard).join("");
+    $("animeRow").innerHTML = anime.slice(0, 14).map(movieCard).join("");
+
+    $("topMoviesRow").innerHTML = [...movies]
+      .sort((a,b) => b.rating - a.rating)
+      .slice(0,10)
+      .map((x,i) => movieCard(x,i+1)).join("");
+
+    $("topShowsRow").innerHTML = [...shows]
+      .sort((a,b) => b.rating - a.rating)
+      .slice(0,10)
+      .map((x,i) => movieCard(x,i+1)).join("");
+
+    bindCards($("moviesRow"));
+    bindCards($("showsRow"));
+    bindCards($("animeRow"));
+    bindCards($("topMoviesRow"));
+    bindCards($("topShowsRow"));
+
+    renderContinue();
+    renderLibrary();
+  }
+
+  function renderContinue() {
+    const valid = state.continueWatching
+      .map(id => state.catalog.find(x => x.id === id))
+      .filter(Boolean);
+
+    if (!valid.length) {
+      $("continueSection").classList.add("hidden");
+      return;
+    }
+
+    $("continueSection").classList.remove("hidden");
+
+    $("continueRow").innerHTML = valid.map((item, index) => `
+      <article class="movie-card card cursor-pointer" data-item-id="${item.id}" data-item-type="${item.type}">
+        <div class="relative">
+          <img class="poster" src="${escapeHTML(item.poster)}" alt="${escapeHTML(item.title)}">
+          <div class="absolute left-2 right-2 bottom-2 progress-track">
+            <div class="progress-bar" style="width:${35 + index * 11}%"></div>
+          </div>
+        </div>
+        <div class="p-2.5">
+          <div class="font-bold text-sm truncate">${escapeHTML(item.title)}</div>
+          <div class="text-xs text-slate-500 mt-1">Continue watching</div>
+        </div>
+      </article>
+    `).join("");
+
+    bindCards($("continueRow"));
+  }
+
+  function renderLibrary() {
+    const savedItems = state.catalog.filter(x => state.saved.has(x.id));
+
+    if (!savedItems.length) {
+      $("libraryRow").innerHTML =
+        `<div class="text-sm text-slate-500 py-5">Your saved titles will appear here.</div>`;
+      return;
+    }
+
+    $("libraryRow").innerHTML = savedItems.map(movieCard).join("");
+    bindCards($("libraryRow"));
+  }
+
+  function renderLive() {
+    $("liveRow").innerHTML = LIVE_CHANNELS.map(channel => `
+      <article class="live-card cursor-pointer" data-live-url="${escapeHTML(channel.url)}">
+        <div class="live-thumb" style="background-image:url('${escapeHTML(channel.icon)}')">
+          <div class="absolute z-10 left-3 top-3 badge bg-red-600/90">
+            <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+            LIVE
+          </div>
+        </div>
+        <div class="p-3">
+          <div class="font-bold">${escapeHTML(channel.title)}</div>
+          <div class="text-xs text-slate-500 mt-1">${escapeHTML(channel.subtitle)}</div>
+        </div>
+      </article>
+    `).join("");
+
+    $("liveRow").querySelectorAll("[data-live-url]").forEach(card => {
+      card.onclick = () => openLivePlayer(card.dataset.liveUrl);
+    });
+  }
+
+  async function fetchWithTimeout(url, options = {}, timeout = 6500) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          "Accept": "application/json",
+          ...(options.headers || {})
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  const TMDB_KEY = "c2e2abdddbcdbb4142f36f9bc68d1847";
+  const TMDB_BASE = "https://api.themoviedb.org/3";
+  const TMDB_PROXY = "https://corsproxy.io/?";
+
+  function tmdbURL(path, params = {}) {
+    const query = new URLSearchParams({
+      api_key: TMDB_KEY,
+      language: "en-US",
+      ...params
+    });
+    return `${TMDB_BASE}${path}?${query.toString()}`;
+  }
+
+  async function tmdbFetch(path, params = {}) {
+    const directURL = tmdbURL(path, params);
+
+    try {
+      return await fetchWithTimeout(directURL, {}, 6000);
+    } catch (directError) {
+      try {
+        const proxyURL = TMDB_PROXY + encodeURIComponent(directURL);
+        return await fetchWithTimeout(proxyURL, {}, 7500);
+      } catch (proxyError) {
+        return null;
+      }
+    }
+  }
+
+  /*
+   * Silent network refresh.
+   * Nothing in the UI depends on this promise resolving.
+   */
+  async function backgroundTMDBRefresh() {
+    try {
+      const data = await tmdbFetch("/trending/all/day");
+
+      if (!data || !Array.isArray(data.results)) return;
+
+      const incoming = data.results
+        .filter(x => x.media_type === "movie" || x.media_type === "tv")
+        .slice(0, 20)
+        .map(x => normalizeItem(x));
+
+      if (!incoming.length) return;
+
+      state.catalog = uniqueCatalog(incoming);
+      renderRows();
+
+      /*
+       * Keep the local first-render hero stable while refreshing content.
+       * If desired, newly received titles become available immediately in rows.
+       */
+    } catch (_) {
+      // Intentionally silent: local catalog remains active.
+    }
+  }
+
+  async function loadDetailsFromTMDB(item) {
+    try {
+      const path = `/${item.type === "tv" ? "tv" : "movie"}/${item.id}`;
+      const data = await tmdbFetch(path, {
+        append_to_response: "credits,videos,recommendations"
+      });
+
+      if (!data) return item;
+
+      const updated = normalizeItem({
+        ...item,
+        ...data,
+        type: item.type,
+        genres: data.genres || item.genres,
+        cast: data.credits?.cast?.slice(0, 12).map(c => [
+          c.name,
+          c.character,
+          c.profile_path
+            ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
+            : ""
+        ]) || item.cast,
+        trailer:
+          data.videos?.results?.find(v =>
+            v.site === "YouTube" &&
+            v.type === "Trailer" &&
+            v.official
+          )?.key
+            ? `https://www.youtube.com/embed/${data.videos.results.find(v => v.site === "YouTube" && v.type === "Trailer" && v.official).key}`
+            : item.trailer,
+        seasons: data.number_of_seasons || item.seasons
+      });
+
+      const index = state.catalog.findIndex(x => x.id === item.id && x.type === item.type);
+      if (index >= 0) state.catalog[index] = updated;
+
+      return updated;
+    } catch (_) {
+      return item;
+    }
+  }
+
+  function openDetails(item) {
+    state.current = item;
+
+    $("detailsLayer").classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    renderDetails(item);
+
+    /*
+     * Detail information is enhanced silently after the modal is already visible.
+     */
+    loadDetailsFromTMDB(item).then(updated => {
+      if (!updated) return;
+      state.current = updated;
+      renderDetails(updated);
+    });
+  }
+
+  function renderDetails(item) {
+    $("detailHero").style.backgroundImage =
+      `url("${item.backdrop || item.poster}")`;
+
+    $("detailType").textContent = item.type === "tv" ? "TV SERIES" : "MOVIE";
+    $("detailYear").textContent = item.year || "—";
+    $("detailRating").textContent = `★ ${item.rating ? item.rating.toFixed(1) : "N/A"}`;
+    $("detailTitle").textContent = item.title;
+    $("detailOverview").textContent = item.overview || "No overview available.";
+
+    $("detailGenres").innerHTML = (item.genres || []).slice(0, 5)
+      .map(g => `<span class="badge">${escapeHTML(g)}</span>`)
+      .join("");
+
+    $("favoriteBtn").innerHTML =
+      `<i data-lucide="heart" class="${state.favorites.has(item.id) ? "fill-red-500 text-red-500" : ""}"></i>
+       ${state.favorites.has(item.id) ? "Favorited" : "Favorite"}`;
+
+    $("saveBtn").innerHTML =
+      `<i data-lucide="bookmark" class="${state.saved.has(item.id) ? "fill-red-500 text-red-500" : ""}"></i>
+       ${state.saved.has(item.id) ? "Saved" : "Save"}`;
+
+    if (item.type === "tv" && item.seasons) {
+      renderEpisodes(item);
+    } else {
+      $("episodeSection").classList.add("hidden");
+    }
+
+    renderCast(item);
+    renderRecommendations(item);
+
+    $("detailWatch").onclick = () => openPlayer(item);
+
+    $("favoriteBtn").onclick = () => {
+      if (state.favorites.has(item.id)) {
+        state.favorites.delete(item.id);
+        toast("Removed from favorites");
+      } else {
+        state.favorites.add(item.id);
+        toast("Added to favorites");
+      }
+      saveStorage();
+      renderDetails(item);
+    };
+
+    $("saveBtn").onclick = () => {
+      if (state.saved.has(item.id)) {
+        state.saved.delete(item.id);
+        toast("Removed from library");
+      } else {
+        state.saved.add(item.id);
+        toast("Saved to library");
+      }
+      saveStorage();
+      renderDetails(item);
+      renderLibrary();
+    };
+
+    $("trailerBtn").onclick = () => {
+      if (item.trailer) {
+        openTrailer(item.trailer);
+      } else {
+        toast("Trailer unavailable");
+      }
+    };
+
+    $("shareBtn").onclick = async () => {
+      const shareData = {
+        title: item.title,
+        text: `Check out ${item.title}`,
+        url: location.href.split("#")[0] + "#title=" + item.id
+      };
+
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+        } else {
+          await navigator.clipboard.writeText(shareData.url);
+          toast("Link copied");
+        }
+      } catch (_) {}
+    };
+
+    lucide.createIcons();
+  }
+
+  function renderCast(item) {
+    const cast = item.cast || [];
+
+    if (!cast.length) {
+      $("castRow").innerHTML =
+        `<div class="text-sm text-slate-500 py-4">Cast information will appear when available.</div>`;
+      return;
+    }
+
+    $("castRow").innerHTML = cast.map(person => `
+      <div class="shrink-0 w-28 text-center">
+        <img class="cast-avatar mx-auto"
+             src="${escapeHTML(person[2] || "")}"
+             alt="${escapeHTML(person[0])}"
+             onerror="this.src='https://placehold.co/185x185/1f2937/ffffff?text=Actor'">
+        <div class="font-semibold text-xs mt-2 truncate">${escapeHTML(person[0])}</div>
+        <div class="text-[11px] text-slate-500 truncate">${escapeHTML(person[1] || "")}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderRecommendations(item) {
+    const recommendations = state.catalog
+      .filter(x => x.id !== item.id)
+      .filter(x =>
+        x.type === item.type ||
+        (x.genres || []).some(g => (item.genres || []).includes(g))
+      )
+      .sort((a,b) => b.rating - a.rating)
+      .slice(0, 10);
+
+    $("recommendRow").innerHTML = recommendations.map(movieCard).join("");
+    bindCards($("recommendRow"));
+  }
+
+  function renderEpisodes(item) {
+    $("episodeSection").classList.remove("hidden");
+
+    const seasons = Math.max(1, Number(item.seasons || 1));
+
+    $("seasonSelect").innerHTML =
+      Array.from({length: seasons}, (_, i) =>
+        `<option value="${i + 1}">Season ${i + 1}</option>`
+      ).join("");
+
+    renderEpisodeList(item, 1);
+
+    $("seasonSelect").onchange = () =>
+      renderEpisodeList(item, Number($("seasonSelect").value));
+  }
+
+  function renderEpisodeList(item, season) {
+    /*
+     * Episode entries are UI controls. Actual episode availability should be
+     * supplied by a licensed streaming provider or the provider's own player.
+     */
+    const count = Math.min(12, season === 1 ? 10 : 8);
+
+    $("episodeList").innerHTML = Array.from({length: count}, (_, i) => `
+      <button class="glass rounded-xl p-3 text-left hover:bg-white/10"
+              data-episode="${i + 1}">
+        <div class="text-xs text-slate-500">Episode ${i + 1}</div>
+        <div class="font-semibold text-sm mt-1">Episode ${i + 1}</div>
+      </button>
+    `).join("");
+
+    $("episodeList").querySelectorAll("[data-episode]").forEach(btn => {
+      btn.onclick = () => {
+        openPlayer(item, season, Number(btn.dataset.episode));
+      };
+    });
+  }
+
+  /*
+   * Player intentionally uses official/publicly playable sample media rather
+   * than unauthorized third-party movie/TV streams.
+   */
+  function openPlayer(item, season = 1, episode = 1) {
+    closeDetails();
+
+    if (!state.continueWatching.includes(item.id)) {
+      state.continueWatching.unshift(item.id);
+      state.continueWatching = state.continueWatching.slice(0, 10);
+      saveStorage();
+    }
+
+    $("playerLayer").classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    const servers = [
+      {
+        name: "Demo Player",
+        url: item.stream || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      },
+      {
+        name: "YouTube Trailer",
+        url: item.trailer || ""
+      }
+    ];
+
+    $("serverButtons").innerHTML = servers.map((server, i) => `
+      <button class="server-btn glass rounded-xl px-3 py-2 text-sm ${i === 0 ? "active" : ""}"
+              data-server="${i}">
+        ${escapeHTML(server.name)}
+      </button>
+    `).join("");
+
+    function setServer(index) {
+      const server = servers[index];
+      if (!server || !server.url) {
+        toast("This source is unavailable");
+        return;
+      }
+
+      document.querySelectorAll(".server-btn").forEach((b, i) =>
+        b.classList.toggle("active", i === index)
+      );
+
+      if (server.url.includes("youtube.com/embed")) {
+        $("playerFrame").innerHTML = `
+          <iframe class="player-video"
+                  src="${escapeHTML(server.url)}"
+                  title="${escapeHTML(item.title)}"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowfullscreen></iframe>`;
+      } else {
+        $("playerFrame").innerHTML = `
+          <video class="player-video" controls autoplay playsinline
+                 poster="${escapeHTML(item.backdrop || item.poster)}">
+            <source src="${escapeHTML(server.url)}" type="video/mp4">
+          </video>`;
+      }
+    }
+
+    $("serverButtons").querySelectorAll("[data-server]").forEach(btn => {
+      btn.onclick = () => setServer(Number(btn.dataset.server));
+    });
+
+    setServer(0);
+  }
+
+  function openLivePlayer(url) {
+    $("playerLayer").classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    $("playerFrame").innerHTML = `
+      <iframe class="player-video"
+              src="${escapeHTML(url)}"
+              title="Live channel"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+    `;
+
+    $("serverButtons").innerHTML = `
+      <button class="server-btn active glass rounded-xl px-3 py-2 text-sm">
+        Live source
+      </button>
+    `;
+  }
+
+  function closePlayer() {
+    $("playerLayer").classList.remove("open");
+    $("playerFrame").innerHTML = "";
+    $("serverButtons").innerHTML = "";
+    document.body.style.overflow = "";
+  }
+
+  function openTrailer(url) {
+    $("trailerLayer").classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    $("trailerFrame").innerHTML = `
+      <iframe class="player-video"
+              src="${escapeHTML(url)}"
+              title="Trailer"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+    `;
+  }
+
+  function closeTrailer() {
+    $("trailerLayer").classList.remove("open");
+    $("trailerFrame").innerHTML = "";
+    document.body.style.overflow = "";
+  }
+
+  function closeDetails() {
+    $("detailsLayer").classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function performSearch(query) {
+    const q = query.trim().toLowerCase();
+
+    if (!q) {
+      $("searchResults").classList.add("hidden");
+      return;
+    }
+
+    const local = state.catalog.filter(item =>
+      item.title.toLowerCase().includes(q)
+    ).slice(0, 8);
+
+    $("searchResults").classList.remove("hidden");
+
+    $("searchResults").innerHTML = local.length
+      ? local.map(item => `
+          <button class="w-full flex items-center gap-3 p-3 hover:bg-white/5 text-left"
+                  data-search-id="${item.id}" data-search-type="${item.type}">
+            <img class="w-12 h-16 object-cover rounded-lg"
+                 src="${escapeHTML(item.poster)}"
+                 alt="">
+            <div class="min-w-0">
+              <div class="font-semibold truncate">${escapeHTML(item.title)}</div>
+              <div class="text-xs text-slate-500 mt-1">
+                ${escapeHTML(item.year)} · ${item.type === "tv" ? "TV" : "Movie"}
+              </div>
+            </div>
+          </button>
+        `).join("")
+      : `<div class="p-5 text-sm text-slate-500">Searching live catalog...</div>`;
+
+    $("searchResults").querySelectorAll("[data-search-id]").forEach(btn => {
+      btn.onclick = () => {
+        const item = state.catalog.find(x =>
+          x.id === Number(btn.dataset.searchId) &&
+          x.type === btn.dataset.searchType
+        );
+        if (item) {
+          $("searchInput").value = "";
+          $("searchResults").classList.add("hidden");
+          openDetails(item);
+        }
+      };
+    });
+
+    /*
+     * Search the live API silently as a second stage.
+     */
+    clearTimeout(state.searchTimer);
+    state.searchTimer = setTimeout(async () => {
+      try {
+        const data = await tmdbFetch("/search/multi", { query });
+
+        if (!data?.results) return;
+
+        const incoming = data.results
+          .filter(x => x.media_type === "movie" || x.media_type === "tv")
+          .slice(0, 12)
+          .map(x => normalizeItem(x));
+
+        if (!incoming.length) return;
+
+        state.catalog = uniqueCatalog(incoming);
+        performSearch(query);
+        renderRows();
+      } catch (_) {
+        // Local search stays available.
+      }
+    }, 450);
+  }
+
+  function navigate(section) {
+    closeDrawer();
+
+    const targets = {
+      home: "hero",
+      live: "liveSection",
+      movies: "moviesRow",
+      shows: "showsRow",
+      anime: "animeRow",
+      library: "libraryRow"
+    };
+
+    if (section === "home") {
+      window.scrollTo({top: 0, behavior: "smooth"});
+      return;
+    }
+
+    const target = $(targets[section]);
+    if (target) {
+      target.scrollIntoView({behavior: "smooth", block: "start"});
+    }
+
+    document.querySelectorAll(".bottom-nav button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.nav === section);
+    });
+  }
+
+  function initialize() {
+    /*
+     * Critical instant-render path:
+     * No async call occurs before these render functions.
+     */
+    renderHero();
+    renderRows();
+    renderLive();
+
+    restartHeroTimer();
+
+    document.querySelectorAll("[data-nav]").forEach(btn => {
+      btn.addEventListener("click", () => navigate(btn.dataset.nav));
+    });
+
+    $("openDrawer").onclick = openDrawer;
+    $("closeDrawer").onclick = closeDrawer;
+    $("drawerBackdrop").onclick = closeDrawer;
+
+    $("closeDetails").onclick = closeDetails;
+    $("closePlayer").onclick = closePlayer;
+    $("closeTrailer").onclick = closeTrailer;
+
+    $("detailsLayer").addEventListener("click", e => {
+      if (e.target === $("detailsLayer")) closeDetails();
+    });
+
+    $("playerLayer").addEventListener("click", e => {
+      if (e.target === $("playerLayer")) closePlayer();
+    });
+
+    $("trailerLayer").addEventListener("click", e => {
+      if (e.target === $("trailerLayer")) closeTrailer();
+    });
+
+    $("searchInput").addEventListener("input", e => {
+      performSearch(e.target.value);
+    });
+
+    $("searchInput").addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        e.target.value = "";
+        $("searchResults").classList.add("hidden");
+        e.target.blur();
+      }
+    });
+
+    document.addEventListener("click", e => {
+      const searchBox = $("searchInput");
+      const results = $("searchResults");
+
+      if (!searchBox.contains(e.target) && !results.contains(e.target)) {
+        results.classList.add("hidden");
+      }
+    });
+
+    document.querySelectorAll("[data-star]").forEach(star => {
+      star.style.color = "#475569";
+      star.style.fontSize = "25px";
+      star.onclick = () => {
+        const rating = Number(star.dataset.star);
+        document.querySelectorAll("[data-star]").forEach(s => {
+          s.style.color = Number(s.dataset.star) <= rating ? "#facc15" : "#475569";
+        });
+        toast(`Rated ${rating}/5`);
+      };
+    });
+
+    $("libraryButton").onclick = () => navigate("library");
+
+    lucide.createIcons();
+
+    /*
+     * Background network activity starts only after the initial UI is already
+     * rendered. It cannot hold the page hostage.
+     */
+    setTimeout(() => {
+      backgroundTMDBRefresh();
+    }, 50);
+  }
+
+  /*
+   * DOMContentLoaded is the only startup trigger.
+   * Even if TMDB is completely unreachable, initialize() still runs instantly.
+   */
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize, {once: true});
+  } else {
+    initialize();
+  }
+
+})();
+</script>
+</body>
+        </html>
