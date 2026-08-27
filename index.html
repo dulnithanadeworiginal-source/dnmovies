@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dulo — Watch Movies, Shows & Live Sports</title>
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f19;
+      color: #f3f4f6;
+    }
+    .glass-card {
+      background: rgba(22, 27, 38, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="pb-20 md:pb-0">
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 w-full glass-card border-b border-gray-800/50 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-red-600 text-white font-black text-xl px-3 py-1 rounded-xl shadow-lg shadow-red-600/30">D</div>
+        <span class="text-xl font-bold tracking-tight hidden sm:block">Dulo<span class="text-red-500">.</span></span>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex-1 max-w-md relative">
+        <i data-lucide="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+        <input type="text" id="searchInput" placeholder="Search movies, TV shows, anime..." 
+          class="w-full bg-gray-900/80 border border-gray-700/60 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-red-500 transition">
+      </div>
+
+      <button onclick="toggleSavedModal()" class="flex items-center gap-2 bg-gray-800/80 hover:bg-gray-700 p-2 sm:px-4 sm:py-2 rounded-xl text-sm transition">
+        <i data-lucide="bookmark" class="h-4 w-4 text-red-500"></i>
+        <span class="hidden sm:inline">Saved</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
+
+    <!-- Hero Banner Slider -->
+    <section id="heroSection" class="relative rounded-2xl overflow-hidden min-h-[380px] sm:min-h-[460px] flex items-end p-6 sm:p-10 glass-card">
+      <div id="heroBg" class="absolute inset-0 bg-cover bg-center transition-all duration-700 brightness-50"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-[#0b0f19] via-[#0b0f19]/40 to-transparent"></div>
+      
+      <div class="relative z-10 max-w-2xl space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="bg-red-600/90 text-white text-xs font-semibold px-2.5 py-0.5 rounded-md uppercase tracking-wider">Featured</span>
+          <span id="heroRating" class="bg-yellow-500/20 text-yellow-400 text-xs font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
+            <i data-lucide="star" class="h-3 w-3 fill-yellow-400"></i> 8.8
+          </span>
+          <span id="heroYear" class="text-xs text-gray-300">2024</span>
+        </div>
+        <h1 id="heroTitle" class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">Loading...</h1>
+        <p id="heroOverview" class="text-xs sm:text-sm text-gray-300 line-clamp-3 max-w-xl">Fetching top trending title details...</p>
+        
+        <div class="flex items-center gap-3 pt-2">
+          <button id="heroWatchBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm shadow-lg shadow-red-600/30 transition">
+            <i data-lucide="play" class="h-4 w-4 fill-white"></i> Watch Now
+          </button>
+          <button id="heroDetailsBtn" class="bg-gray-800/80 hover:bg-gray-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition">
+            Details
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top 10 Trending Row -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <i data-lucide="trending-up" class="h-5 w-5 text-red-500"></i> Trending Now
+        </h2>
+      </div>
+      <div id="trendingRow" class="flex gap-4 overflow-x-auto no-scrollbar pb-2"></div>
+    </section>
+
+    <!-- Popular Movies -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <i data-lucide="film" class="h-5 w-5 text-red-500"></i> Popular Movies
+        </h2>
+      </div>
+      <div id="moviesRow" class="flex gap-4 overflow-x-auto no-scrollbar pb-2"></div>
+    </section>
+
+    <!-- Live TV / Sports Channels -->
+    <section class="glass-card p-5 rounded-2xl border border-gray-800">
+      <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+        <i data-lucide="tv" class="h-5 w-5 text-red-500"></i> Live Sports & Channels
+      </h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <button onclick="playStream('https://www.youtube.com/embed/live_stream?channel=UC4R8DWoMoI7CAwX8_LjQHig')" class="bg-gray-900/80 hover:border-red-500 border border-gray-800 p-4 rounded-xl text-left transition">
+          <div class="text-red-500 text-xs font-bold uppercase mb-1">🔴 Live</div>
+          <div class="font-bold text-sm">Sky Sports News</div>
+        </button>
+        <button onclick="playStream('https://www.youtube.com/embed/live_stream?channel=UC16niRr50-MSBwiO3Yvb3RA')" class="bg-gray-900/80 hover:border-red-500 border border-gray-800 p-4 rounded-xl text-left transition">
+          <div class="text-red-500 text-xs font-bold uppercase mb-1">🔴 Live</div>
+          <div class="font-bold text-sm">BBC News Live</div>
+        </button>
+        <div class="bg-gray-900/50 border border-gray-800 p-4 rounded-xl text-left">
+          <div class="text-gray-500 text-xs font-bold uppercase mb-1">Stream</div>
+          <div class="font-bold text-sm text-gray-400">ESPN 2 (Event)</div>
+        </div>
+        <div class="bg-gray-900/50 border border-gray-800 p-4 rounded-xl text-left">
+          <div class="text-gray-500 text-xs font-bold uppercase mb-1">Stream</div>
+          <div class="font-bold text-sm text-gray-400">TNT Sports</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Video Stream Player Modal -->
+  <div id="playerModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-6">
+    <div class="w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl relative">
+      <button onclick="closePlayer()" class="absolute top-3 right-3 z-10 bg-gray-800/80 hover:bg-red-600 text-white p-2 rounded-full transition">
+        <i data-lucide="x" class="h-5 w-5"></i>
+      </button>
+      <div class="aspect-video w-full bg-black">
+        <iframe id="streamFrame" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div class="p-4 bg-gray-900 flex justify-between items-center text-xs text-gray-400">
+        <span>Server 1 (Auto-Embed)</span>
+        <span>If stream doesn't load, reload page or select another source.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-card border-t border-gray-800 sm:hidden py-2 px-6 flex justify-between items-center">
+    <button class="flex flex-col items-center gap-1 text-red-500 text-xs font-semibold">
+      <i data-lucide="home" class="h-5 w-5"></i> Home
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-white text-xs">
+      <i data-lucide="tv" class="h-5 w-5"></i> Live
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-white text-xs">
+      <i data-lucide="film" class="h-5 w-5"></i> Movies
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-white text-xs">
+      <i data-lucide="bookmark" class="h-5 w-5"></i> Saved
+    </button>
+  </nav>
+
+  <!-- JavaScript App Logic -->
+  <script>
+    // TMDB API Details
+    const API_KEY = 'c2e2abdddbcdbb4142f36f9bc68d1847';
+    const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
+    const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
+
+    // Instant Fallback Data (Ensures NO infinite loading if ISP blocks TMDB)
+    const fallbackMovies = [
+      {
+        id: 27205,
+        title: "Inception",
+        vote_average: 8.4,
+        release_date: "2010-07-15",
+        overview: "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life.",
+        poster_path: "/oYuLE13L3B32939B2fA2939B.jpg",
+        backdrop_path: "/s3T19R22B2F2A2939B.jpg"
+      },
+      {
+        id: 157336,
+        title: "Interstellar",
+        vote_average: 8.7,
+        release_date: "2014-11-05",
+        overview: "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel.",
+        poster_path: "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+        backdrop_path: "/xJHokMbljvjU8R2B2F2A2939B.jpg"
+      },
+      {
+        id: 603,
+        title: "The Matrix",
+        vote_average: 8.2,
+        release_date: "1999-03-30",
+        overview: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+        poster_path: "/f89U3w9RAA9G2939B.jpg",
+        backdrop_path: "/3r9f89U3w9RAA9G2939B.jpg"
+      }
+    ];
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadInitialData();
+    });
+
+    async function loadInitialData() {
+      try {
+        // Try Direct TMDB API Fetch
+        const res = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        renderUI(data.results);
+      } catch (err) {
+        console.warn("Direct TMDB API failed. Loading CORS proxy or fallback dataset...");
+        // Secondary Proxy Fetch Attempt
+        try {
+          const proxyRes = await fetch(`https://corsproxy.io/?https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+          const proxyData = await proxyRes.json();
+          renderUI(proxyData.results);
+        } catch (proxyErr) {
+          // Render Fallback Dataset instantly
+          renderUI(fallbackMovies);
+        }
+      }
+    }
+
+    function renderUI(movies) {
+      if (!movies || movies.length === 0) return;
+
+      // Render Hero Banner with 1st movie
+      const hero = movies[0];
+      document.getElementById('heroTitle').innerText = hero.title || hero.name;
+      document.getElementById('heroOverview').innerText = hero.overview;
+      document.getElementById('heroRating').innerHTML = `<i data-lucide="star" class="h-3 w-3 fill-yellow-400"></i> ${hero.vote_average.toFixed(1)}`;
+      document.getElementById('heroYear').innerText = (hero.release_date || '2024').split('-')[0];
+      document.getElementById('heroBg').style.backgroundImage = `url('${BACKDROP_PATH}${hero.backdrop_path}')`;
+      
+      document.getElementById('heroWatchBtn').onclick = () => playMovie(hero.id);
+
+      // Render Content Rows
+      renderRow('trendingRow', movies);
+      renderRow('moviesRow', movies.slice().reverse());
+      
+      lucide.createIcons();
+    }
+
+    function renderRow(elementId, items) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = items.map((item, index) => `
+        <div onclick="playMovie(${item.id})" class="min-w-[140px] sm:min-w-[170px] cursor-pointer group">
+          <div class="relative rounded-xl overflow-hidden glass-card aspect-[2/3] mb-2 border border-gray-800 group-hover:border-red-500/50 transition">
+            <img src="${item.poster_path ? IMG_PATH + item.poster_path : 'https://via.placeholder.com/500x750'}" 
+                 alt="${item.title}" 
+                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-yellow-400 text-xs px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+              ★ ${item.vote_average ? item.vote_average.toFixed(1) : '8.0'}
+            </div>
+          </div>
+          <h3 class="font-semibold text-xs sm:text-sm truncate text-gray-200 group-hover:text-red-500 transition">${item.title || item.name}</h3>
+          <p class="text-[11px] text-gray-400">${(item.release_date || '').split('-')[0]}</p>
+        </div>
+      `).join('');
+    }
+
+    function playMovie(tmdbId) {
+      const embedUrl = `https://vidsrc.to/embed/movie/${tmdbId}`;
+      playStream(embedUrl);
+    }
+
+    function playStream(url) {
+      const modal = document.getElementById('playerModal');
+      const frame = document.getElementById('streamFrame');
+      frame.src = url;
+      modal.classList.remove('hidden');
+    }
+
+    function closePlayer() {
+      const modal = document.getElementById('playerModal');
+      const frame = document.getElementById('streamFrame');
+      frame.src = '';
+      modal.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
